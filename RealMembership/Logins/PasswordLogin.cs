@@ -18,6 +18,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Security.Cryptography;
+using System.Threading.Tasks;
 
 namespace RealMembership.Logins
 {
@@ -73,7 +74,15 @@ namespace RealMembership.Logins
         where TAccount : IUserAccount<TAccount, TDateTime>
         where TDateTime : struct
     {
-        
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PasswordLogin{TAccount, TDateTime}"/> class.
+        /// </summary>
+        /// <param name="password">The password that should be stored.</param>
+        protected PasswordLogin(string password) : this()
+        {
+            PasswordHash = CalculateHash(password).Result;
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PasswordLogin"/> class.
@@ -98,6 +107,16 @@ namespace RealMembership.Logins
             this.Salt = Convert.ToBase64String(salt);
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PasswordLogin{TAccount, TDateTime}"/> class.
+        /// </summary>
+        /// <param name="hashIterations">The hash iterations.</param>
+        /// <param name="salt">The salt.</param>
+        /// <param name="password">The password.</param>
+        protected PasswordLogin(int hashIterations, byte[] salt, string password) : this(hashIterations, salt)
+        {
+            PasswordHash = CalculateHash(password).Result;
+        }
 
         /// <summary>
         /// Gets or sets the password hash stored in this object.
@@ -172,19 +191,29 @@ namespace RealMembership.Logins
         }
 
         /// <summary>
+        /// Calculates the hash of the given password using the stored salt and iterations and returns the base64 encoded result.
+        /// </summary>
+        /// <param name="password">The password that should be hashed.</param>
+        /// <returns></returns>
+        protected virtual Task<string> CalculateHash(string password)
+        {
+            byte[] salt = Convert.FromBase64String(Salt);
+            using (Rfc2898DeriveBytes pbkdf2 = new Rfc2898DeriveBytes(password, salt, Iterations))
+            {
+                return Task.FromResult(Convert.ToBase64String(pbkdf2.GetBytes(salt.Length)));
+            }
+        }
+
+        /// <summary>
         /// Determines if the given password matches the password stored in this login.
         /// </summary>
         /// <param name="password">The password to validate against the store.</param>
         /// <returns>
         ///   <c>true</c> if the password is valid for this login, otherwise false.
         /// </returns>
-        public bool MatchesPassword(string password)
+        public async Task<bool> MatchesPasswordAsync(string password)
         {
-            byte[] salt = Convert.FromBase64String(Salt);
-            using (Rfc2898DeriveBytes pbkdf2 = new Rfc2898DeriveBytes(password, salt, Iterations))
-            {
-                return pbkdf2.GetBytes(salt.Length).SequenceEqual(Convert.FromBase64String(PasswordHash));
-            }
+            return (await CalculateHash(password)).Equals(PasswordHash, StringComparison.Ordinal);
         }
 
         /// <summary>
@@ -193,15 +222,76 @@ namespace RealMembership.Logins
         /// </summary>
         /// <param name="code">The code to validated against the stored code.</param>
         /// <returns><c>true</c> if the code is valid for this login, otherwise <c>false</c></returns>
-        public virtual bool MatchesResetCode(string code)
+        public virtual Task<bool> MatchesResetCodeAsync(string code)
         {
-            return IsInResetProcess && ResetCode != null && ResetCode.Equals(code, StringComparison.Ordinal);
+            return Task.FromResult(IsInResetProcess && ResetCode != null && ResetCode.Equals(code, StringComparison.Ordinal));
         }
 
         /// <summary>
         /// Requests a new password reset code for this login.
         /// </summary>
         /// <returns>Returns a new string representing the password reset code or null if a reset is not allowed.</returns>
-        public abstract string RequestResetCode();
+        public abstract Task<PasswordResetRequestResult> RequestResetCodeAsync();
+
+        /// <summary>
+        /// Sets the password stored in this object to the given value and returns a result determining whether the operation was sucessful.
+        /// </summary>
+        /// <param name="newPassword">The new password that should be stored in the login.</param>
+        /// <returns>
+        /// Returns a new <see cref="SetPasswordResult" /> that represents whether the operation was successful.
+        /// </returns>
+        public abstract Task<SetPasswordResult> SetPasswordAsync(string newPassword);
+
+        /// <summary>
+        /// Sets the password stored in this object to the given value and returns a result determining whether the operation was sucessful.
+        /// Should be used internally by <see cref="SetPassword(string)"/> to catch the common problems with setting the password.
+        /// </summary>
+        /// <param name="newPassword">The new password that should be stored in the login.</param>
+        /// <returns>
+        /// Returns a new <see cref="SetPasswordResult" /> that represents whether any problems were found with the operation.
+        /// Returns null if no problems were found.
+        /// </returns>
+        protected virtual Task<SetPasswordResult> SetPasswordCoreAsync(string newPassword)
+        {
+            SetPasswordResult result;
+            if (string.IsNullOrEmpty(newPassword))
+            {
+                result = new SetPasswordResult
+                {
+                    Successful = false,
+                    Result = SetPasswordResultType.NullOrEmptyPassword
+                };
+            }
+            else if (!this.IsCurrentlyActive)
+            {
+                result = new SetPasswordResult
+                {
+                    Successful = false,
+                    Result = SetPasswordResultType.LoginNotActive,
+                    Message = "The login is not active."
+                };
+            }
+            else if (!this.IsVerified)
+            {
+                result = new SetPasswordResult
+                {
+                    Successful = false,
+                    Result = SetPasswordResultType.LoginNotVerified
+                };
+            }
+            else if (this.IsLockedOut)
+            {
+                result = new SetPasswordResult
+                {
+                    Successful = false,
+                    Result = SetPasswordResultType.AccountLockedOut
+                };
+            }
+            else
+            {
+                result = null;
+            }
+            return Task.FromResult(result);
+        }
     }
 }

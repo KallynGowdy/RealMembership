@@ -54,10 +54,20 @@ namespace RealMembership
         }
 
         /// <summary>
-        /// Gets or sets the type of the result.
+        /// Gets or sets the <see cref="SetPasswordResult"/> that was the result of the password reset process.
         /// </summary>
         /// <returns></returns>
-        public PasswordResetFinishType Result
+        public SetPasswordResult SetPasswordResult
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets the general type of the result.
+        /// </summary>
+        /// <returns></returns>
+        public PasswordResetFinishType GeneralResult
         {
             get;
             set;

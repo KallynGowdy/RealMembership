@@ -82,12 +82,22 @@ namespace RealMembership
         /// Defines that the account has not yet been verified, so a password reset cannot be started.
         /// </summary>
         [Description("The account is not verified yet, the password reset process could not be started.")]
-        NotVerified,
+        LoginNotVerified,
 
         /// <summary>
         /// Defines that the account is not active, so a password reset cannot be started.
         /// </summary>
         [Description("The account is not active, the password reset process could not be started.")]
-        NotActive,
+        LoginNotActive,
+
+        /// <summary>
+        /// Defines that the account is locked due to too many incorrect login attempts in a row.
+        /// </summary>
+        AccountLockedOut,
+
+        /// <summary>
+        /// Defines that the set password process failed for a different reason. (not active, not validated, ect.)
+        /// </summary>
+        OtherReasonForFailure
     }
 }

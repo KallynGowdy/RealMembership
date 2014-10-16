@@ -61,19 +61,26 @@ namespace RealMembership.Logins
         /// </summary>
         /// <param name="code">The code to validated against the stored code.</param>
         /// <returns><c>true</c> if the code is valid for this login, otherwise <c>false</c></returns>
-        bool MatchesResetCode(string code);
+        Task<bool> MatchesResetCodeAsync(string code);
 
         /// <summary>
         /// Requests a new password reset code for this login.
         /// </summary>
         /// <returns>Returns a new string representing the password reset code or null if a reset is not allowed.</returns>
-        string RequestResetCode();
+        Task<PasswordResetRequestResult> RequestResetCodeAsync();
 
         /// <summary>
         /// Determines if the given password matches the password stored in this login.
         /// </summary>
         /// <param name="password">The password to validate against the store.</param>
         /// <returns><c>true</c> if the password is valid for this login, otherwise false.</returns>
-        bool MatchesPassword(string password);
+        Task<bool> MatchesPasswordAsync(string password);
+
+        /// <summary>
+        /// Sets the password stored in this object to the given value and returns a result determining whether the operation was sucessful.
+        /// </summary>
+        /// <param name="newPassword">The new password that should be stored in the login.</param>
+        /// <returns>Returns a new <see cref="SetPasswordResult"/> that represents whether the operation was successful.</returns>
+        Task<SetPasswordResult> SetPasswordAsync(string newPassword);
     }
 }

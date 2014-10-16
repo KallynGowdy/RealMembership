@@ -54,6 +54,20 @@ namespace RealMembership
         Task<IPhoneLogin<TAccount, TDateTime>> GetLoginByPhoneAsync(string tenant, string phoneNumber);
 
         /// <summary>
+        /// Gets the login that contains the given password reset code. Returns null if it doesn't exist.
+        /// </summary>
+        /// <param name="code">The code that the login should be retrieved with.</param>
+        /// <returns>Returns an awaitable task that results in the <see cref="IPasswordLogin{TAccount, TDate}"/> that has the given code.</returns>
+        Task<IPasswordLogin<TAccount, TDateTime>> GetLoginByResetCodeAsync(string code);
+
+        /// <summary>
+        /// Gets the account that has the given ID.
+        /// </summary>
+        /// <param name="id">The ID of the account that should be retrieved.</param>
+        /// <returns>Returns an awaitable task that results in the <see cref="TAccount"/> that has the given ID.</returns>
+        Task<TAccount> GetAccountById(long id);
+
+        /// <summary>
         /// Records a new login attempt that was against the given tenant using the given identification for a login with the given identification type that had the given result
         /// and was for the given login.
         /// </summary>
@@ -64,5 +78,6 @@ namespace RealMembership
         /// <param name="login">The specific login that the attempt was against. If null then no login was found.</param>
         /// <returns>Returns the newly created login attempt.</returns>
         Task<ILoginAttempt<TAccount, TDateTime>> RecordAttemptForLoginAsync(string tenant, string identification, string identificationType, AuthenticationResult result, ILogin<TAccount, TDateTime> login);
+
     }
 }
