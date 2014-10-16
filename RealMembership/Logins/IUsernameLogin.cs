@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RealMembership
+namespace RealMembership.Logins
 {
     /// <summary>
     /// Defines an interface for objects that represent a login for usernames.

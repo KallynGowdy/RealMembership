@@ -5,14 +5,12 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Security.Cryptography;
 
-namespace RealMembership
+namespace RealMembership.Logins
 {
     /// <summary>
-    /// Defines an abstract class that represents a <see cref="IPasswordLogin"/>.
+    /// Defines a static class that provides several helpers used in cryptography.
     /// </summary>
-    public abstract class PasswordLogin<TAccount, TDateTime> : Login<TAccount, TDateTime>, IPasswordLogin<TAccount, TDateTime>
-        where TAccount : IUserAccount<TAccount, TDateTime>
-        where TDateTime : struct
+    public static class CryptoHelpers
     {
         /// <summary>
         /// Gets the default number of iterations based on the current date.
@@ -45,20 +43,30 @@ namespace RealMembership
         /// <returns></returns>
         public static byte[] GetSecureRandomBytes(int count)
         {
-            using(RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider())
+            using (RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider())
             {
                 byte[] b = new byte[count];
                 rng.GetBytes(b);
                 return b;
             }
         }
+    }
+
+    /// <summary>
+    /// Defines an abstract class that represents a <see cref="IPasswordLogin"/>.
+    /// </summary>
+    public abstract class PasswordLogin<TAccount, TDateTime> : Login<TAccount, TDateTime>, IPasswordLogin<TAccount, TDateTime>
+        where TAccount : IUserAccount<TAccount, TDateTime>
+        where TDateTime : struct
+    {
+        
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PasswordLogin"/> class.
         /// </summary>
-        protected PasswordLogin() : this(DefaultIterations, GetSecureRandomBytes(DefaultHashSize))
+        protected PasswordLogin() : this(CryptoHelpers.DefaultIterations, CryptoHelpers.GetSecureRandomBytes(CryptoHelpers.DefaultHashSize))
         {
-
+            
         }
 
         /// <summary>

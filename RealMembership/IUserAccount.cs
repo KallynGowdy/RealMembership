@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RealMembership.Logins;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,6 +13,25 @@ namespace RealMembership
     public interface IUserAccount<TAccount, TDateTime> : IHasId, IAuditable<TDateTime> where TDateTime : struct where TAccount : IUserAccount<TAccount, TDateTime>
     {
         /// <summary>
+        /// Gets whether the account is currently locked because of incorrect login attempts.
+        /// </summary>
+        /// <returns></returns>
+        bool IsLockedOut
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Gets or sets the time that the lockout ends on.
+        /// </summary>
+        /// <returns></returns>
+        TDateTime? LockoutEndTime
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// Gets or sets the Tenant that this account belongs to.
         /// </summary>
         /// <returns></returns>
@@ -19,6 +39,15 @@ namespace RealMembership
         {
             get;
             set;
+        }
+
+        /// <summary>
+        /// Gets whether the account requires two factor authentication or not.
+        /// </summary>
+        /// <returns></returns>
+        bool RequiresTwoFactorAuth
+        {
+            get;
         }
 
         /// <summary>

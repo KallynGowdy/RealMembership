@@ -4,13 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RealMembership
+namespace RealMembership.Logins
 {
     /// <summary>
     /// Defines an abstract class that provides a base for <see cref="ILogin"/>.
     /// </summary>
-    public abstract class Login<TAccount, TDateTime> : ILogin<TAccount, TDateTime> 
-        where TAccount : IUserAccount<TAccount, TDateTime> 
+    public abstract class Login<TAccount, TDateTime> : ILogin<TAccount, TDateTime>
+        where TAccount : IUserAccount<TAccount, TDateTime>
         where TDateTime : struct
     {
         /// <summary>
@@ -42,6 +42,18 @@ namespace RealMembership
         }
 
         /// <summary>
+        /// Gets whether the account is currently locked because of incorrect login attempts.
+        /// </summary>
+        /// <returns></returns>
+        public abstract bool IsLockedOut { get; }
+
+        /// <summary>
+        /// Gets or sets the time that the lockout ends on.
+        /// </summary>
+        /// <returns></returns>
+        public virtual TDateTime? LockoutEndTime { get; set; }
+
+        /// <summary>
         /// Gets or sets whether this login is verified or not.
         /// </summary>
         public virtual bool IsVerified
@@ -49,7 +61,7 @@ namespace RealMembership
             get;
             set;
         }
-
+        
         /// <summary>
         /// Gets or sets whether this login requires verification before it can be used.
         /// </summary>
@@ -67,6 +79,27 @@ namespace RealMembership
         {
             get;
             set;
+        }
+
+        /// <summary>
+        /// Gets the collection of login attempts that have been made against this login.
+        /// If null then login attempts should not be recorded.
+        /// </summary>
+        /// <returns></returns>
+        public virtual ICollection<ILoginAttempt<TAccount, TDateTime>> LoginAttempts
+        {
+            get;
+            protected set;
+        }
+
+
+        /// <summary>
+        /// Retrieves a new verification code for this login. (and therefore invalidates the current verification code)
+        /// </summary>
+        /// <returns>Returns a new string representing the new verification code or null if verification cannot be performed on this login. (already verified, etc.)</returns>
+        public virtual string RequestVerificationCode()
+        {
+            return (VerificationCode = (!IsVerified && IsCurrentlyActive) ? Convert.ToBase64String(CryptoHelpers.GetSecureRandomBytes(CryptoHelpers.DefaultHashSize)) : null);
         }
 
         /// <summary>

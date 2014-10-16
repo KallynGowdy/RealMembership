@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RealMembership.Logins;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,7 +10,7 @@ namespace RealMembership
     /// <summary>
     /// Defines an interface for objects that provide services that manipulate users.
     /// </summary>
-    public interface IUserService<TAccount, TDateTime> 
+    public interface IUserService<TAccount, TDateTime>
         where TAccount : IUserAccount<TAccount, TDateTime>
         where TDateTime : struct
     {
@@ -58,5 +59,13 @@ namespace RealMembership
         /// <param name="newPassword">The new password that should be used for the login.</param>
         /// <returns></returns>
         PasswordResetFinishResult<TAccount, TDateTime> FinishPasswordReset(string code, string newPassword);
+
+
+        Task<AuthenticationResult> AuthenticateWithUsernameAsync(string tenant, string username, string password);
+        Task<AuthenticationResult> AuthenticateWithEmailAndPasswordAsync(string tenant, string email, string password);
+        Task<AuthenticationResult> AuthenticateWithLoginAsync(string tenant, IPasswordLogin<TAccount, TDateTime> login, string password);
+        Task<AuthenticationResult> AuthenticateWithLoginAsync(string tenant, IPhoneLogin<TAccount, TDateTime> login, string code);
+        Task<AuthenticationResult> AuthenticateWithEmailAndCodeAsync(string tenant, string email, string code);
+
     }
 }

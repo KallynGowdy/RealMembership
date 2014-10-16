@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RealMembership
+namespace RealMembership.Logins
 {
     /// <summary>
     /// Defines an interface for logins that require a password.

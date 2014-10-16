@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RealMembership.Logins;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -28,6 +29,19 @@ namespace RealMembership
         /// Gets or sets the ID of the object.
         /// </summary>
         public long Id { get; set; }
+
+        /// <summary>
+        /// Gets whether this account requires two factor authentication or not.
+        /// Determined by the presence of a two factor login in this account's list of logins.
+        /// </summary>
+        /// <returns></returns>
+        public virtual bool RequiresTwoFactorAuth
+        {
+            get
+            {
+                return Logins.Any(l => l is ITwoFactorLogin<TAccount, TDate>);
+            }
+        }
 
         /// <summary>
         /// Gets or sets the time that this account was created.
@@ -87,5 +101,17 @@ namespace RealMembership
             get;
             set;
         }
+
+        /// <summary>
+        /// Gets whether the user has been locked out of the account due to too many incorrect login attempts.
+        /// </summary>
+        /// <returns></returns>
+        public abstract bool IsLockedOut { get; }
+
+        /// <summary>
+        /// Gets or sets the time that the lockout ends at.
+        /// </summary>
+        /// <returns></returns>
+        public abstract TDate? LockoutEndTime { get; set; }
     }
 }

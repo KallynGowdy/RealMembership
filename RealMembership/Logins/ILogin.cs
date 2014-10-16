@@ -1,6 +1,7 @@
 using System;
+using System.Collections.Generic;
 
-namespace RealMembership
+namespace RealMembership.Logins
 {
     /// <summary>
     /// Defines an interface that represents an authentication method for a user.
@@ -9,6 +10,17 @@ namespace RealMembership
         where TAccount : IUserAccount<TAccount, TDate> 
         where TDate : struct
     {
+
+        /// <summary>
+        /// Gets the collection of login attempts that have been made against this login.
+        /// If null then login attempts should not be recorded.
+        /// </summary>
+        /// <returns></returns>
+        ICollection<ILoginAttempt<TAccount, TDate>> LoginAttempts
+        {
+            get;
+        }
+
         /// <summary>
         /// Gets or sets whether this login is verified or not.
         /// </summary>
@@ -35,6 +47,12 @@ namespace RealMembership
         /// <param name="code">The code that should be used the verify the login.</param>
         /// <returns></returns>
         bool Verify(string code);
+
+        /// <summary>
+        /// Retrieves a new verification code for this login. (and therefore invalidates the current verification code)
+        /// </summary>
+        /// <returns>Returns a new string representing the new verification code or null if verification cannot be performed on this login. (already verified, etc.)</returns>
+        string RequestVerificationCode();
 
         /// <summary>
         /// Gets or sets whether this login can currently be used. (i.e. whether it is active or not)

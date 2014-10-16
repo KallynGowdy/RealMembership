@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RealMembership
+namespace RealMembership.Logins
 {
     /// <summary>
     /// Defines a class that represents a user's login with an email address.
     /// </summary>
-    public interface IEmailLogin<TAccount, TDate> : IPasswordLogin<TAccount, TDate>
+    public interface IEmailLogin<TAccount, TDate> : ILogin<TAccount, TDate>
         where TAccount : IUserAccount<TAccount, TDate>
         where TDate : struct
     {
