@@ -21,6 +21,11 @@ using RealMembership.Logins;
 
 namespace RealMembership
 {
+    /// <summary>
+    /// Defines an abstract base class that provides an implementation of <see cref="IUserService{TAccount, TDateTime}"/>.
+    /// </summary>
+    /// <typeparam name="TAccount">The type of the user account.</typeparam>
+    /// <typeparam name="TDateTime">The type of the values that should be used for datetime recording.</typeparam>
     public abstract class UserService<TAccount, TDateTime> : IUserService<TAccount, TDateTime>
         where TAccount : IUserAccount<TAccount, TDateTime>
         where TDateTime : struct
@@ -45,6 +50,14 @@ namespace RealMembership
             Repository = loginRepository;
         }
 
+        /// <summary>
+        /// Processes the given login as a login of the given target type and returns the correct authorization result for any
+        /// problems with the given login. Returns null if there are no current problems.
+        /// </summary>
+        /// <typeparam name="TTargetLogin">The type of the login that is expected to be retrieved.</typeparam>
+        /// <param name="login">The login that has currently been retrieved.</param>
+        /// <param name="target">The target login that the given login will be cast from. Returned as null if the login could not be converted.</param>
+        /// <returns>Returns a new authentication result that represents the result of the processing if any issues were found with the given login, otherwise null.</returns>
         protected AuthenticationResult ProcessBasicLogin<TTargetLogin>(ILogin<TAccount, TDateTime> login, out TTargetLogin target)
             where TTargetLogin : class, ILogin<TAccount, TDateTime>
         {
@@ -59,6 +72,12 @@ namespace RealMembership
             return result;
         }
 
+        /// <summary>
+        /// Processes the given login for any minor problems (inactive, not verified, locked out, etc.) and returns a new <see cref="AuthenticationResult"/> to
+        /// represent the problems. Returns null if no problems were found.
+        /// </summary>
+        /// <param name="login">The login that should be processed.</param>
+        /// <returns>Returns a new <see cref="AuthenticationResult"/> that represents the problem that was found with the login, if not problems were found then null.</returns>
         protected AuthenticationResult ProcessBasicLogin(ILogin<TAccount, TDateTime> login)
         {
             if (login == null)
