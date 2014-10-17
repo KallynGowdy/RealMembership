@@ -68,6 +68,13 @@ namespace RealMembership
         Task<TAccount> GetAccountById(long id);
 
         /// <summary>
+        /// Persists the given account in the backing data store.
+        /// </summary>
+        /// <param name="account"></param>
+        /// <returns></returns>
+        Task CreateAccountAsync(TAccount account);
+
+        /// <summary>
         /// Records a new login attempt that was against the given tenant using the given identification for a login with the given identification type that had the given result
         /// and was for the given login.
         /// </summary>
@@ -76,7 +83,7 @@ namespace RealMembership
         /// <param name="identificationType">The type of identification used. (email, username, etc.)</param>
         /// <param name="result">The result of the authentication attempt.</param>
         /// <param name="login">The specific login that the attempt was against. If null then no login was found.</param>
-        /// <returns>Returns the newly created login attempt.</returns>
+        /// <returns>Returns the login attempt that the information was recorded in.</returns>
         Task<ILoginAttempt<TAccount, TDateTime>> RecordAttemptForLoginAsync(string tenant, string identification, IdentificationType? identificationType, AuthenticationResult result, ILogin<TAccount, TDateTime> login);
 
         /// <summary>
@@ -88,20 +95,42 @@ namespace RealMembership
         /// <param name="identificationType">The type of identification that was used.</param>
         /// <param name="result">The result of the password reset request attempt.</param>
         /// <param name="login">The specific login that the attempt was against. If null then no login was found.</param>
-        /// <returns>Returns the newly created login attempt.</returns>
+        /// <returns>Returns the password reset attempt that the information was recorded in.</returns>
         Task<IPasswordResetAttempt<TAccount, TDateTime>> RecordAttemptForPasswordResetAsync(string tenant, string identification, IdentificationType? identificationType, PasswordResetRequestResult result, IPasswordLogin<TAccount, TDateTime> login);
 
         /// <summary>
-        /// Records the attempt to finish the password reset process for the given login for the given tenant using the given identification for a login with the given identification type that had the given
+        /// Records the attempt to finish the password reset process for the given login for the given tenant using the given identification and resulted with the given
         /// result.
         /// </summary>
         /// <param name="tenant">The tenant that the password reset attempt was for.</param>
-        /// <param name="identification">The identification that was used in the login attempt.</param>
+        /// <param name="identification">The identification that was used in the attempt.</param>
         /// <param name="identificationType">The type of identification that was used.</param>
         /// <param name="result">The result of the attempt to finish the password reset process.</param>
         /// <param name="login">The specific login that the attempt was against. If null then no login was found.</param>
-        /// <returns>Returns the newly created login attempt.</returns>
+        /// <returns>Returns the password reset attempt that the information was recorded in.</returns>
         Task<IPasswordResetAttempt<TAccount, TDateTime>> RecordAttemptForPasswordResetAsync(string tenant, string identification, IdentificationType? identificationType, PasswordResetFinishResult<TAccount, TDateTime> result, IPasswordLogin<TAccount, TDateTime> login);
+
+        /// <summary>
+        /// Records an attempt to retrieve a new verification code for the given login belonging to the given tenant using the given identification that resulted with the given result.
+        /// </summary>
+        /// <param name="tenant">The tenant that the verification request attempt was for.</param>
+        /// <param name="identification">The identification that was used in the attempt.</param>
+        /// <param name="identificationType">The type of identification that was used.</param>
+        /// <param name="result">The result of the attempt to request a new verification code.</param>
+        /// <param name="login">The specific login that the attempt was against. If null then no login was found.</param>
+        /// <returns>Returns the verification request attempt that the information was recorded in.</returns>
+        Task<IVerificationRequestAttempt<TAccount, TDateTime>> RecordAttemptForLoginVerificationAsync(string tenant, string identification, IdentificationType? identificationType, VerificationRequestResult result, ILogin<TAccount, TDateTime> login);
+
+        /// <summary>
+        /// Records an attempt to verify the given login belonging to the given tenant using the given identification that resulted with the given result.
+        /// </summary>
+        /// <param name="tenant">The tenant that the verification attempt was for.</param>
+        /// <param name="identification">The identification that was used in the attempt.</param>
+        /// <param name="identificationType">The type of identification that was used.</param>
+        /// <param name="result">The result of the attempt to verify the login.</param>
+        /// <param name="login">The specific login that the attempt was against. If null then no login was found.</param>
+        /// <returns>Returns the verification request attempt that the information was recorded in.</returns>
+        Task<IVerificationRequestAttempt<TAccount, TDateTime>> RecordAttemptForLoginVerificationAsync(string tenant, string identification, IdentificationType? identificationType, VerificationResult result, ILogin<TAccount, TDateTime> login);
 
         /// <summary>
         /// Gets the login that currently posseses the given verification code.

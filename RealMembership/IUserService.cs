@@ -135,11 +135,19 @@ namespace RealMembership
         Task<VerificationResult> VerifyLoginWithCodeAsync(string code);
 
         /// <summary>
-        /// Requests a new verification code to be sent for the given email belonging to the given tentant.
+        /// Requests a new verification code to be sent for the given email belonging to the given tenant.
         /// </summary>
         /// <param name="tenant">The tenant that the email address belongs to.</param>
         /// <param name="email">The email address that the new verification code is being requested for.</param>
         /// <returns>Returns a new awaitable task that results in a new <see cref="VerificationRequestResult"/> that represents the result of the request.</returns>
         Task<VerificationRequestResult> RequestNewEmailVerificationCodeAsync(string tenant, string email);
+
+        /// <summary>
+        /// Requests a new verification code to be sent to the given phone number belonging to the given tenant.
+        /// </summary>
+        /// <param name="tenant">The tenant that the phone number is contained by.</param>
+        /// <param name="phoneNumber">The phone number that the new code should be sent to.</param>
+        /// <returns>Returns a new awaitable task that results in the result of the verification request.</returns>
+        Task<VerificationRequestResult> RequestNewSmsVerificationCodeAsync(string tenant, string phoneNumber);
     }
 }

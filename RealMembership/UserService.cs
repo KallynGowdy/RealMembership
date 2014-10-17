@@ -301,14 +301,7 @@ namespace RealMembership
                     SetPasswordResult = passwordSetResult
                 };
             }
-            if (login == null)
-            {
-                await Repository.RecordAttemptForPasswordResetAsync(null, code, IdentificationType.ResetCode, result, login);
-            }
-            else
-            {
-                await Repository.RecordAttemptForPasswordResetAsync(login.Account.Tenant, code, IdentificationType.ResetCode, result, login);
-            }
+            await Repository.RecordAttemptForPasswordResetAsync(login != null ? login.Account.Tenant : null, code, IdentificationType.ResetCode, result, login);
             return result;
         }
 
@@ -394,6 +387,7 @@ namespace RealMembership
             {
                 result = await login.VerifyAsync(code);
             }
+            await Repository.RecordAttemptForLoginVerificationAsync(null, code, IdentificationType.VerificationCode, result, login);
             return result;
         }
 
@@ -433,13 +427,50 @@ namespace RealMembership
         }
 
         /// <summary>
+        /// Requests a new verification code to be sent to the given phone number belonging to the given tenant.
+        /// </summary>
+        /// <param name="tenant">The tenant that the phone number is contained by.</param>
+        /// <param name="phoneNumber">The phone number that the new code should be sent to.</param>
+        /// <returns>
+        /// Returns a new awaitable task that results in the result of the verification request.
+        /// </returns>
+        public async virtual Task<VerificationRequestResult> RequestNewSmsVerificationCodeAsync(string tenant, string phoneNumber)
+        {
+            IPhoneLogin<TAccount, TDateTime> login = await Repository.GetLoginByPhoneAsync(tenant, phoneNumber);
+            VerificationRequestResult result;
+            if (login == null)
+            {
+                result = new VerificationRequestResult
+                {
+                    Successful = false,
+                    Code = null,
+                    Result = VerificationRequestResultType.NotFound
+                };
+            }
+            else
+            {
+                result = await login.RequestVerificationCodeAsync();
+                if (result.Successful)
+                {
+                    await SendSmsAsync(new SmsMessage
+                    {
+                        PhoneNumber = login.PhoneNumber,
+                        Body = await MessageFormatter.FormatVerifyLoginMessageAsync(result.Code, login)
+                    });
+                }
+            }
+            await Repository.RecordAttemptForLoginVerificationAsync(tenant, phoneNumber, IdentificationType.PhoneNumber, result, login);
+            return result;
+        }
+
+        /// <summary>
         /// Sends the given <see cref="SmsMessage"/> using the configured <see cref="SmsService"/>.
         /// Throws a new <see cref="InvalidOperationException"/> if no <see cref="SmsService"/> was configured.
         /// </summary>
         /// <param name="message">The message that should be sent.</param>
         protected virtual Task SendSmsAsync(SmsMessage message)
         {
-            if(SmsService == null)
+            if (SmsService == null)
             {
                 throw new InvalidOperationException("No SMS Service was provided so SMS cannot be sent.");
             }
@@ -456,7 +487,7 @@ namespace RealMembership
         /// <param name="message">The message that should be sent.</param>
         protected virtual Task SendEmailAsync(EmailMessage message)
         {
-            if(EmailService == null)
+            if (EmailService == null)
             {
                 throw new InvalidOperationException("No Email Service was provided so email cannot be sent.");
             }

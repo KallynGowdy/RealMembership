@@ -37,30 +37,12 @@ namespace RealMembership.Logins
         }
 
         /// <summary>
-        /// Gets or sets whether the reset attempt has been finished or closed. (No longer valid)
+        /// Gets whether the reset attempt has been finished or closed. (No longer valid)
         /// </summary>
         /// <returns></returns>
         bool Finished
         {
             get;
-            set;
         }
-    }
-
-
-    /// <summary>
-    /// Defines a list of values that represent which phase the password reset attempt was for. (Requesting the code or finishing the reset by providing a code)
-    /// </summary>
-    public enum ResetPhase
-    {
-        /// <summary>
-        /// Defines that the reset attempt was for the first phase of the reset process. That is, a reset code was being requested.
-        /// </summary>
-        RequestCode,
-
-        /// <summary>
-        /// Defines that the reset attempt was for the last phase of the reset process. That is, the reset code was being provided with a new password.
-        /// </summary>
-        FinishReset
     }
 }

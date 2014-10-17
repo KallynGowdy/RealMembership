@@ -141,6 +141,11 @@ namespace RealMembership.Logins
         /// <summary>
         /// Defines that the type of identification provided was a login verification code.
         /// </summary>
-        VerificationCode
+        VerificationCode,
+        
+        /// <summary>
+        /// Defines that the type of identification provided was a phone number.
+        /// </summary>
+        PhoneNumber
     }
 }

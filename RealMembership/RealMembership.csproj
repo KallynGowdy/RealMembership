@@ -40,6 +40,8 @@
     <Compile Include="IMessageFormatter.cs" />
     <Compile Include="Logins\ILoginSecurityEvent.cs" />
     <Compile Include="Logins\IPasswordResetAttempt.cs" />
+    <Compile Include="Logins\IVerificationRequestAttempt.cs" />
+    <Compile Include="QueryableLoginRepository.cs" />
     <Compile Include="Results\AccountCreationResult.cs" />
     <Compile Include="Results\AuthenticationResult.cs" />
     <Compile Include="Claim.cs" />
