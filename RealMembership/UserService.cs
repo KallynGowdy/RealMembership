@@ -61,6 +61,16 @@ namespace RealMembership
         }
 
         /// <summary>
+        /// Gets or sets the <see cref="IMessageFormatter"/> that should be used to format the outgoing messages.
+        /// </summary>
+        /// <returns></returns>
+        protected IMessageFormatter<TAccount, TDateTime> MessageFormatter
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="UserService{TAccount, TDateTime}"/> class.
         /// </summary>
         /// <param name="loginRepository">The login repository.</param>
@@ -135,7 +145,7 @@ namespace RealMembership
         /// <param name="email">The email address of the login to authenticate against.</param>
         /// <param name="code">The code that should be used for the credentials of the authentication.</param>
         /// <returns></returns>
-        public Task<AuthenticationResult> AuthenticateWithEmailAndCodeAsync(string tenant, string email, string code)
+        public virtual Task<AuthenticationResult> AuthenticateWithEmailAndCodeAsync(string tenant, string email, string code)
         {
             throw new NotImplementedException();
         }
@@ -156,7 +166,7 @@ namespace RealMembership
             {
                 result = ProcessTwoFactor(await passwordLogin.MatchesPasswordAsync(password), passwordLogin);
             }
-            await Repository.RecordAttemptForLoginAsync(tenant, email, "email", result, login);
+            await Repository.RecordAttemptForLoginAsync(tenant, email, IdentificationType.Email, result, login);
             return result;
         }
 
@@ -167,7 +177,7 @@ namespace RealMembership
         /// <param name="login">The login to authenticate against.</param>
         /// <param name="code">The code that should be used for the credentials of the authentication.</param>
         /// <returns></returns>
-        public Task<AuthenticationResult> AuthenticateWithLoginAsync(IPhoneLogin<TAccount, TDateTime> login, string code)
+        public virtual Task<AuthenticationResult> AuthenticateWithLoginAsync(IPhoneLogin<TAccount, TDateTime> login, string code)
         {
             throw new NotImplementedException();
         }
@@ -205,7 +215,7 @@ namespace RealMembership
             {
                 result = ProcessTwoFactor(await login.MatchesPasswordAsync(password), login);
             }
-            await Repository.RecordAttemptForLoginAsync(tenant, username, "username", result, login);
+            await Repository.RecordAttemptForLoginAsync(tenant, username, IdentificationType.Username, result, login);
             return result;
         }
 
@@ -215,8 +225,6 @@ namespace RealMembership
         /// <param name="account">The account that should be created.</param>
         /// <returns>Returns a new <see cref="AccountCreationResult"/> object that represents the result of the operation.</returns>
         public abstract Task<AccountCreationResult> CreateAccountAsync(TAccount account);
-
-        
 
         /// <summary>
         /// Gets the user that belongs to the given tenant with the given email address.
@@ -228,6 +236,7 @@ namespace RealMembership
         {
             return Repository.GetLoginByEmailAsync(tenant, email);
         }
+
         /// <summary>
         /// Gets the user that belongs to the given tenant with the given username.
         /// </summary>
@@ -257,7 +266,7 @@ namespace RealMembership
         /// <param name="code">The code that validates the password reset.</param>
         /// <param name="newPassword">The new password that should be used for the login.</param>
         /// <returns></returns>
-        public async Task<PasswordResetFinishResult<TAccount, TDateTime>> FinishPasswordResetAsync(string code, string newPassword)
+        public virtual async Task<PasswordResetFinishResult<TAccount, TDateTime>> FinishPasswordResetAsync(string code, string newPassword)
         {
             PasswordResetFinishResult<TAccount, TDateTime> result;
             var login = await Repository.GetLoginByResetCodeAsync(code);
@@ -292,7 +301,42 @@ namespace RealMembership
                     SetPasswordResult = passwordSetResult
                 };
             }
+            if (login == null)
+            {
+                await Repository.RecordAttemptForPasswordResetAsync(null, code, IdentificationType.ResetCode, result, login);
+            }
+            else
+            {
+                await Repository.RecordAttemptForPasswordResetAsync(login.Account.Tenant, code, IdentificationType.ResetCode, result, login);
+            }
+            return result;
+        }
 
+        /// <summary>
+        /// Requests a password reset for the login contained by the given tenant with the given email.
+        /// </summary>
+        /// <param param name="email">The email address of the login that the password request is for.</param>
+        /// <param name="tenant">The tenant that the login should be retrieved from.</param>
+        /// <returns></returns>
+        public virtual async Task<PasswordResetRequestResult> RequestEmailPasswordResetAsync(string tenant, string email)
+        {
+            IPasswordLogin<TAccount, TDateTime> login = await Repository.GetLoginByEmailAsync(tenant, email) as IPasswordLogin<TAccount, TDateTime>;
+            PasswordResetRequestResult result = await RequestPasswordResetAsync(login);
+            await Repository.RecordAttemptForPasswordResetAsync(tenant, email, IdentificationType.Email, result, login);
+            return result;
+        }
+
+        /// <summary>
+        /// Requests a password reset for the login contained by the given tenant with the given username.
+        /// </summary>
+        /// <param name="username">The username of the login that the password reset is for.</param>
+        /// <param name="tenant">The tenant that the login should be retrieved from.</param>
+        /// <returns></returns>
+        public virtual async Task<PasswordResetRequestResult> RequestUsernamePasswordResetAsync(string tenant, string username)
+        {
+            IPasswordLogin<TAccount, TDateTime> login = await Repository.GetLoginByUsernameAsync(tenant, username);
+            PasswordResetRequestResult result = await RequestPasswordResetAsync(login);
+            await Repository.RecordAttemptForPasswordResetAsync(tenant, username, IdentificationType.Username, result, login);
             return result;
         }
 
@@ -301,23 +345,125 @@ namespace RealMembership
         /// </summary>
         /// <param name="login">The login that the password reset is for.</param>
         /// <returns></returns>
-        public async Task<PasswordResetRequestResult> RequestPasswordResetAsync(IPasswordLogin<TAccount, TDateTime> login)
+        protected async Task<PasswordResetRequestResult> RequestPasswordResetAsync(IPasswordLogin<TAccount, TDateTime> login)
         {
             PasswordResetRequestResult result;
-            if(login == null)
+            if (login == null)
             {
                 result = new PasswordResetRequestResult
                 {
                     Successful = false,
                     Code = null,
-                    Result = PasswordResetRequestResultType.NonExistantAccount
+                    Result = PasswordResetRequestResultType.NonExistantLogin
                 };
             }
             else
             {
                 result = await login.RequestResetCodeAsync();
+                if (result.Successful)
+                {
+                    await SendEmailAsync(new EmailMessage
+                    {
+                        Recipent = login.EmailAddress,
+                        Html = await MessageFormatter.FormatPasswordResetMessageAsync(result.Code, login),
+                        Subject = await MessageFormatter.FormatPasswordResetSubjectAsync(login)
+                    });
+                }
             }
             return result;
+        }
+
+        /// <summary>
+        /// Attempts to verify the login that contains the given verification code and returns the result of the verification.
+        /// </summary>
+        /// <param name="code">The verifcation code.</param>
+        /// <returns></returns>
+        public async Task<VerificationResult> VerifyLoginWithCodeAsync(string code)
+        {
+            VerificationResult result;
+            ILogin<TAccount, TDateTime> login = await Repository.GetLoginByVerificationCodeAsync(code);
+            if (login == null)
+            {
+                result = new VerificationResult
+                {
+                    Successful = false,
+                    Result = VerificationResultType.CodeNotFound
+                };
+            }
+            else
+            {
+                result = await login.VerifyAsync(code);
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Requests a new verification code to be sent for the given email belonging to the given tentant.
+        /// </summary>
+        /// <param name="tenant">The tenant that the email address belongs to.</param>
+        /// <param name="email">The email address that the new verification code is being requested for.</param>
+        /// <returns>Returns a new awaitable task that results in a new <see cref="VerificationRequestResult"/> that represents the result of the request.</returns>
+        public async Task<VerificationRequestResult> RequestNewEmailVerificationCodeAsync(string tenant, string email)
+        {
+            IEmailLogin<TAccount, TDateTime> login = await GetLoginByEmailAsync(tenant, email);
+            VerificationRequestResult result;
+            if (login == null)
+            {
+                result = new VerificationRequestResult
+                {
+                    Successful = false,
+                    Code = null,
+                    Result = VerificationRequestResultType.NotFound
+                };
+            }
+            else
+            {
+                result = await login.RequestVerificationCodeAsync();
+                if (result.Successful)
+                {
+                    await SendEmailAsync(new EmailMessage
+                    {
+                        Recipent = login.EmailAddress,
+                        Html = await MessageFormatter.FormatVerifyLoginMessageAsync(result.Code, login),
+                        Subject = await MessageFormatter.FormatVerifyLoginSubjectAsync(login)
+                    });
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Sends the given <see cref="SmsMessage"/> using the configured <see cref="SmsService"/>.
+        /// Throws a new <see cref="InvalidOperationException"/> if no <see cref="SmsService"/> was configured.
+        /// </summary>
+        /// <param name="message">The message that should be sent.</param>
+        protected virtual Task SendSmsAsync(SmsMessage message)
+        {
+            if(SmsService == null)
+            {
+                throw new InvalidOperationException("No SMS Service was provided so SMS cannot be sent.");
+            }
+            else
+            {
+                return SmsService.SendSmsAsync(message);
+            }
+        }
+
+        /// <summary>
+        /// Sends the given <see cref="EmailMessage"/> using the configured <see cref="EmailService"/>.
+        /// Throws a new <see cref="InvalidOperationException"/> if no <see cref="EmailService"/> was configured.
+        /// </summary>
+        /// <param name="message">The message that should be sent.</param>
+        protected virtual Task SendEmailAsync(EmailMessage message)
+        {
+            if(EmailService == null)
+            {
+                throw new InvalidOperationException("No Email Service was provided so email cannot be sent.");
+            }
+            else
+            {
+                return EmailService.SendEmailAsync(message);
+            }
         }
     }
 }

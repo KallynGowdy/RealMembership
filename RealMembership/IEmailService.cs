@@ -28,9 +28,7 @@ namespace RealMembership
         /// <summary>
         /// Sends an email to the given recipiant with the given subject and html.
         /// </summary>
-        /// <param name="recipiant">The address that the email should be sent to.</param>
-        /// <param name="subject">The subject of the email.</param>
-        /// <param name="html">The HTML body of the email.</param>
-        void SendEmail(string recipiant, string subject, string html);
+        /// <param name="message">The message that should be sent.</param>
+        Task SendEmailAsync(EmailMessage message);
     }
 }

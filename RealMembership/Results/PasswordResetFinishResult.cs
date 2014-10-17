@@ -12,38 +12,44 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
+using RealMembership.Logins;
+using System;
+
 namespace RealMembership
 {
     /// <summary>
-    /// Defines a class that represents the result of the account creation process.
+    /// Defines a class that represents the result of finishing a password reset process.
     /// </summary>
-    public sealed class AccountCreationResult : IResult
+    public sealed class PasswordResetFinishResult<TAccount, TDateTime> : ResultBase
+        where TAccount : IUserAccount<TAccount, TDateTime>
+        where TDateTime : struct
     {
         /// <summary>
-        /// Gets or sets whether the creation was successful.
+        /// Gets or sets the login that the reset was for.
+        /// Null if not sucessful.
         /// </summary>
         /// <returns></returns>
-        public bool Successful
+        public IPasswordLogin<TAccount, TDateTime> Login
         {
             get;
             set;
         }
 
         /// <summary>
-        /// Gets or sets the type that defines why the result was successful or not.
+        /// Gets or sets the <see cref="SetPasswordResult"/> that was the result of the password reset process.
         /// </summary>
         /// <returns></returns>
-        public AccountCreationResultType Result
+        public SetPasswordResult SetPasswordResult
         {
             get;
             set;
         }
 
         /// <summary>
-        /// Gets or sets the message that describes the result.
+        /// Gets or sets the general type of the result.
         /// </summary>
         /// <returns></returns>
-        public string Message
+        public PasswordResetFinishType GeneralResult
         {
             get;
             set;
@@ -51,33 +57,23 @@ namespace RealMembership
     }
 
     /// <summary>
-    /// Defines a list of values that represent the type of result that came of the account creation process.
+    /// Defines a list of values that describe a possible outcome for the password reset finishing process.
     /// </summary>
-    public enum AccountCreationResultType
+    public enum PasswordResetFinishType
     {
         /// <summary>
-        /// Defines that the account was created successfully and the verification code was sent.
+        /// Defines that the password was successfully reset.
         /// </summary>
-        CreatedAndSentCode,
+        PasswordReset,
 
         /// <summary>
-        /// Defines that the account was created, but the verification code was not sent.
+        /// Defines that the code was invalid.
         /// </summary>
-        CreatedButCodeNotSent,
-        
-        /// <summary>
-        /// Defines that the given password was invalid.
-        /// </summary>
-        InvalidPassword,
+        InvalidCode,
 
         /// <summary>
-        /// Defines that the given username was invalid.
+        /// Defines that the new password was invalid.
         /// </summary>
-        InvalidUsername,
-
-        /// <summary>
-        /// Defines that the given email was invalid.
-        /// </summary>
-        InvalidEmail
+        InvalidPassword
     }
 }

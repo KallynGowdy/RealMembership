@@ -5,26 +5,8 @@ namespace RealMembership.Logins
     /// <summary>
     /// Defines a class that represents the result of a 'Set Password' operation.
     /// </summary>
-    public class SetPasswordResult : IResult
+    public class SetPasswordResult : ResultBase
     {
-        /// <summary>
-        /// Gets or sets the message that describes the result.
-        /// </summary>
-        public virtual string Message
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// Gets or sets whether the operation was successful.
-        /// </summary>
-        public virtual bool Successful
-        {
-            get;
-            set;
-        }
-
         /// <summary>
         /// Gets or sets the result of the 'Set Password' process
         /// </summary>

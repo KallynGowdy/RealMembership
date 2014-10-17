@@ -60,11 +60,19 @@ namespace RealMembership
         Task<AccountCreationResult> CreateAccountAsync(TAccount account);
 
         /// <summary>
-        /// Requests a password reset for the given login.
+        /// Requests a password reset for the login contained by the given tenant with the given email.
+        /// </summary>
+        /// <param param name="email">The email address of the login that the password request is for.</param>
+        /// <param name="tenant">The tenant that the login should be retrieved from.</param>
+        /// <returns></returns>
+        Task<PasswordResetRequestResult> RequestEmailPasswordResetAsync(string tenant, string email);
+
+        /// <summary>
+        /// Requests a password reset for the login contained by the given tenant with the given username.
         /// </summary>
         /// <param name="login">The login that the password reset is for.</param>
         /// <returns></returns>
-        Task<PasswordResetRequestResult> RequestPasswordResetAsync(IPasswordLogin<TAccount, TDateTime> login);
+        Task<PasswordResetRequestResult> RequestUsernamePasswordResetAsync(string tenant, string username);
 
         /// <summary>
         /// Finishes the password reset process for the given code by applying the new password.
@@ -119,5 +127,19 @@ namespace RealMembership
         /// <returns></returns>
         Task<AuthenticationResult> AuthenticateWithEmailAndCodeAsync(string tenant, string email, string code);
 
+        /// <summary>
+        /// Attempts to verify the login that contains the given verification code and returns the result of the verification.
+        /// </summary>
+        /// <param name="code">The verifcation code.</param>
+        /// <returns></returns>
+        Task<VerificationResult> VerifyLoginWithCodeAsync(string code);
+
+        /// <summary>
+        /// Requests a new verification code to be sent for the given email belonging to the given tentant.
+        /// </summary>
+        /// <param name="tenant">The tenant that the email address belongs to.</param>
+        /// <param name="email">The email address that the new verification code is being requested for.</param>
+        /// <returns>Returns a new awaitable task that results in a new <see cref="VerificationRequestResult"/> that represents the result of the request.</returns>
+        Task<VerificationRequestResult> RequestNewEmailVerificationCodeAsync(string tenant, string email);
     }
 }

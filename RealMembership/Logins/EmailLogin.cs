@@ -24,7 +24,7 @@ namespace RealMembership.Logins
     /// <summary>
     /// Defines am abstract class that represents an <see cref="IEmailLogin{TAccount, TDate}"/>.
     /// </summary>
-    public abstract class EmailLogin<TAccount, TDateTime> : PasswordLogin<TAccount, TDateTime>, IEmailLogin<TAccount, TDateTime>
+    public abstract class EmailLogin<TAccount, TDateTime> : Login<TAccount, TDateTime>, IEmailLogin<TAccount, TDateTime>
         where TAccount : IUserAccount<TAccount, TDateTime>
         where TDateTime : struct
     {

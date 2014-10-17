@@ -19,8 +19,9 @@ namespace RealMembership
     /// <summary>
     /// Defines a class that represents the result of authenticating a user.
     /// </summary>
-    public sealed class AuthenticationResult : IResult
+    public sealed class AuthenticationResult : ResultBase
     {
+        #region Static Results
         public static AuthenticationResult NotFound
         {
             get
@@ -127,25 +128,8 @@ namespace RealMembership
                     Result = AuthenticationResultType.AccountLockedOut
                 };
             }
-        }
-
-        /// <summary>
-        /// Gets or sets the message that describes the result.
-        /// </summary>
-        public string Message
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// Gets or sets whether the operation was successful.
-        /// </summary>
-        public bool Successful
-        {
-            get;
-            set;
-        }
+        } 
+        #endregion
 
         /// <summary>
         /// Gets or sets the value that describes the type of the authentication result.

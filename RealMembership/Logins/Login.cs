@@ -75,7 +75,7 @@ namespace RealMembership.Logins
             get;
             set;
         }
-        
+
         /// <summary>
         /// Gets or sets whether this login requires verification before it can be used.
         /// </summary>
@@ -106,14 +106,34 @@ namespace RealMembership.Logins
             protected set;
         }
 
-
         /// <summary>
         /// Retrieves a new verification code for this login. (and therefore invalidates the current verification code)
         /// </summary>
         /// <returns>Returns a new string representing the new verification code or null if verification cannot be performed on this login. (already verified, etc.)</returns>
-        public virtual string RequestVerificationCode()
+        public virtual Task<VerificationRequestResult> RequestVerificationCodeAsync()
         {
-            return (VerificationCode = (!IsVerified && IsCurrentlyActive) ? Convert.ToBase64String(CryptoHelpers.GetSecureRandomBytes(CryptoHelpers.DefaultHashSize)) : null);
+            VerificationRequestResultType type;
+            if (!IsCurrentlyActive)
+            {
+                type = VerificationRequestResultType.LoginNotActive;
+                VerificationCode = null;
+            }
+            else if (IsVerified)
+            {
+                type = VerificationRequestResultType.AlreadyVerified;
+                VerificationCode = null;
+            }
+            else
+            {
+                VerificationCode = Convert.ToBase64String(CryptoHelpers.GetSecureRandomBytes(CryptoHelpers.DefaultHashSize));
+                type = VerificationRequestResultType.NewCodeCreated;
+            }
+            return Task.FromResult(new VerificationRequestResult
+            {
+                Code = VerificationCode,
+                Successful = type == VerificationRequestResultType.NewCodeCreated,
+                Result = type
+            });
         }
 
         /// <summary>
@@ -121,13 +141,31 @@ namespace RealMembership.Logins
         /// </summary>
         /// <param name="code">The code that should be used the verify the login.</param>
         /// <returns></returns>
-        public bool Verify(string code)
+        public Task<VerificationResult> VerifyAsync(string code)
         {
-            if (!IsVerified)
+            VerificationResultType type;
+            if (!IsCurrentlyActive)
+            {
+                type = VerificationResultType.LoginNotActive;
+            }
+            else if (!IsVerified)
             {
                 IsVerified = VerificationCode.Equals(code, StringComparison.Ordinal);
+                type = IsVerified ? VerificationResultType.LoginVerified : VerificationResultType.InvalidCode;
             }
-            return IsVerified;
+            else
+            {
+                type = VerificationResultType.AlreadyVerified;
+            }
+            if (IsVerified)
+            {
+                VerificationCode = null;
+            }
+            return Task.FromResult(new VerificationResult
+            {
+                Successful = IsVerified,
+                Result = type
+            });
         }
     }
 }

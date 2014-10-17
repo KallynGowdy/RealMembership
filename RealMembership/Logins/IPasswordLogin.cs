@@ -23,7 +23,7 @@ namespace RealMembership.Logins
     /// <summary>
     /// Defines an interface for logins that require a password.
     /// </summary>
-    public interface IPasswordLogin<TAccount, TDate> : ILogin<TAccount, TDate>
+    public interface IPasswordLogin<TAccount, TDate> : IEmailLogin<TAccount, TDate>
         where TAccount : IUserAccount<TAccount, TDate>
         where TDate : struct
     {
@@ -43,7 +43,6 @@ namespace RealMembership.Logins
         TDate? ResetRequestTime
         {
             get;
-            set;
         }
 
         /// <summary>
@@ -66,7 +65,7 @@ namespace RealMembership.Logins
         /// <summary>
         /// Requests a new password reset code for this login.
         /// </summary>
-        /// <returns>Returns a new string representing the password reset code or null if a reset is not allowed.</returns>
+        /// <returns>Returns a new <see cref="PasswordResetRequestResult"/> object representing the result of the password reset request.</returns>
         Task<PasswordResetRequestResult> RequestResetCodeAsync();
 
         /// <summary>

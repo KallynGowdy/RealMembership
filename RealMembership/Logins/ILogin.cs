@@ -14,6 +14,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace RealMembership.Logins
 {
@@ -60,13 +61,13 @@ namespace RealMembership.Logins
         /// </summary>
         /// <param name="code">The code that should be used the verify the login.</param>
         /// <returns></returns>
-        bool Verify(string code);
+        Task<VerificationResult> VerifyAsync(string code);
 
         /// <summary>
         /// Retrieves a new verification code for this login. (and therefore invalidates the current verification code)
         /// </summary>
         /// <returns>Returns a new string representing the new verification code or null if verification cannot be performed on this login. (already verified, etc.)</returns>
-        string RequestVerificationCode();
+        Task<VerificationRequestResult> RequestVerificationCodeAsync();
 
         /// <summary>
         /// Gets or sets whether this login can currently be used. (i.e. whether it is active or not)

@@ -28,6 +28,17 @@ namespace RealMembership.Logins
     public static class CryptoHelpers
     {
         /// <summary>
+        /// Gets the date for January 1st, 2014.
+        /// </summary>
+        public static readonly DateTime _2014 = new DateTime(2014, 1, 1, 0, 0, 1, DateTimeKind.Utc);
+
+        /// <summary>
+        /// Gets the number of OWASP recommended iterations for 2014.
+        /// </summary>
+        /// <value>128,000</value>
+        public const int IterationsFor2014 = 128000;
+
+        /// <summary>
         /// Gets the default number of iterations based on the current date.
         /// </summary>
         /// <returns></returns>
@@ -35,8 +46,34 @@ namespace RealMembership.Logins
         {
             get
             {
-                return Convert.ToInt32(DateTime.Now.Ticks / 10000000);
+                return GetIterationsForYear(
+                    ((((((DateTime.UtcNow.Ticks
+                        / 10000D) // 10,000 ticks in a milisecond
+                        / 1000D) // 1000 miliseconds in a second
+                        / 60D) // 60 seconds in a minute
+                        / 60D) // 60 minute in an hour
+                        / 24d) // 24 hours in a day
+                        / 365.25d) // 365 days in a year
+                        + 1); // +1 year because Ticks starts from year 0001 instead of year 0000
             }
+        }
+
+
+        public static int GetIterationsForYear(double year)
+        {
+            double _2014 = 2014;
+            if (year > _2014)
+            {                
+                double totalYearsSince2014 = year - _2014;
+                double doublePerExtra2Years = Math.Pow(2, totalYearsSince2014 / 2);
+                int currentIterations = (int)(IterationsFor2014 * doublePerExtra2Years); // the number of iterations should double every two years,
+                                                                                         // so take the total number of years since 2014 til now
+                                                                                         // and multiply to get the current number of iterations that should be used.
+                                                                                         // If the value is less than the number of iterations for 2014
+                                                                                         // then the conversion wrapped
+                return currentIterations < IterationsFor2014 ? int.MaxValue : currentIterations;
+            }
+            return IterationsFor2014;
         }
 
         /// <summary>
@@ -47,7 +84,7 @@ namespace RealMembership.Logins
         {
             get
             {
-                return DateTime.Now.Year - 1994;
+                return DateTime.Now.Year - 1994; // 20 bytes in 2014
             }
         }
 
@@ -70,7 +107,7 @@ namespace RealMembership.Logins
     /// <summary>
     /// Defines an abstract class that represents a <see cref="IPasswordLogin"/>.
     /// </summary>
-    public abstract class PasswordLogin<TAccount, TDateTime> : Login<TAccount, TDateTime>, IPasswordLogin<TAccount, TDateTime>
+    public abstract class PasswordLogin<TAccount, TDateTime> : EmailLogin<TAccount, TDateTime>, IPasswordLogin<TAccount, TDateTime>
         where TAccount : IUserAccount<TAccount, TDateTime>
         where TDateTime : struct
     {
@@ -79,7 +116,7 @@ namespace RealMembership.Logins
         /// Initializes a new instance of the <see cref="PasswordLogin{TAccount, TDateTime}"/> class.
         /// </summary>
         /// <param name="password">The password that should be stored.</param>
-        protected PasswordLogin(string password) : this()
+        protected PasswordLogin(string email, string password) : this(email)
         {
             PasswordHash = CalculateHash(password).Result;
         }
@@ -87,9 +124,9 @@ namespace RealMembership.Logins
         /// <summary>
         /// Initializes a new instance of the <see cref="PasswordLogin"/> class.
         /// </summary>
-        protected PasswordLogin() : this(CryptoHelpers.DefaultIterations, CryptoHelpers.GetSecureRandomBytes(CryptoHelpers.DefaultHashSize))
+        protected PasswordLogin(string email) : this(email, CryptoHelpers.DefaultIterations, CryptoHelpers.GetSecureRandomBytes(CryptoHelpers.DefaultHashSize))
         {
-            
+
         }
 
         /// <summary>
@@ -99,7 +136,7 @@ namespace RealMembership.Logins
         /// <param name="salt">The salt.</param>
         /// <exception cref="ArgumentOutOfRangeException">hashIterations</exception>
         /// <exception cref="ArgumentNullException">salt</exception>
-        protected PasswordLogin(int hashIterations, byte[] salt)
+        protected PasswordLogin(string email, int hashIterations, byte[] salt) : base(email)
         {
             if (hashIterations < 1) throw new ArgumentOutOfRangeException("hashIterations");
             if (salt == null) throw new ArgumentNullException("salt");
@@ -113,7 +150,7 @@ namespace RealMembership.Logins
         /// <param name="hashIterations">The hash iterations.</param>
         /// <param name="salt">The salt.</param>
         /// <param name="password">The password.</param>
-        protected PasswordLogin(int hashIterations, byte[] salt, string password) : this(hashIterations, salt)
+        protected PasswordLogin(string email, int hashIterations, byte[] salt, string password) : this(email, hashIterations, salt)
         {
             PasswordHash = CalculateHash(password).Result;
         }
@@ -189,6 +226,7 @@ namespace RealMembership.Logins
             get;
             set;
         }
+
 
         /// <summary>
         /// Calculates the hash of the given password using the stored salt and iterations and returns the base64 encoded result.

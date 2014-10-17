@@ -20,25 +20,8 @@ namespace RealMembership
     /// <summary>
     /// Defines a class that represents the result of the password reset request process.
     /// </summary>
-    public sealed class PasswordResetRequestResult : IResult
+    public sealed class PasswordResetRequestResult : ResultBase
     {
-        /// <summary>
-        /// Gets the message that describes the result.
-        /// </summary>
-        public string Message
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// Gets whether the operation was successful.
-        /// </summary>
-        public bool Successful
-        {
-            get;
-            set;
-        }
 
         /// <summary>
         /// Gets or sets the literal value that describes the result.
@@ -73,10 +56,10 @@ namespace RealMembership
         Success,
 
         /// <summary>
-        /// Defines that the account that the password reset was requested for is non-existant.
+        /// Defines that the login that the password reset was requested for is non-existant.
         /// </summary>
-        [Description("The account does not exist, the password reset process could not be started.")]
-        NonExistantAccount,
+        [Description("The login does not exist, the password reset process could not be started.")]
+        NonExistantLogin,
 
         /// <summary>
         /// Defines that the account has not yet been verified, so a password reset cannot be started.
