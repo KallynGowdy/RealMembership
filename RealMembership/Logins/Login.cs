@@ -12,6 +12,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
+using RealMembership.Logins.SecurityEvents;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,7 +22,7 @@ using System.Threading.Tasks;
 namespace RealMembership.Logins
 {
     /// <summary>
-    /// Defines an abstract class that provides a base for <see cref="ILogin"/>.
+    /// Defines an abstract class that provides a base for <see cref="ILogin{TAccount, TDateTime}"/>.
     /// </summary>
     public abstract class Login<TAccount, TDateTime> : ILogin<TAccount, TDateTime>
         where TAccount : IUserAccount<TAccount, TDateTime>
@@ -96,11 +97,9 @@ namespace RealMembership.Logins
         }
 
         /// <summary>
-        /// Gets the collection of login attempts that have been made against this login.
-        /// If null then login attempts should not be recorded.
+        /// Gets the collection of security events that have occured for this login. If null then security should not be recorded.
         /// </summary>
-        /// <returns></returns>
-        public virtual ICollection<ILoginAttempt<TAccount, TDateTime>> LoginAttempts
+        public virtual ICollection<LoginSecurityEvent<TAccount, TDateTime>> SecurityEvents
         {
             get;
             protected set;

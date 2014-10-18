@@ -18,6 +18,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using RealMembership.Logins;
+using RealMembership.Logins.SecurityEvents;
 
 namespace RealMembership
 {
@@ -61,7 +62,7 @@ namespace RealMembership
         }
 
         /// <summary>
-        /// Gets or sets the <see cref="IMessageFormatter"/> that should be used to format the outgoing messages.
+        /// Gets or sets the <see cref="IMessageFormatter{TAccount, TDateTime}"/> that should be used to format the outgoing messages.
         /// </summary>
         /// <returns></returns>
         protected IMessageFormatter<TAccount, TDateTime> MessageFormatter
@@ -88,7 +89,7 @@ namespace RealMembership
         /// <param name="login">The login that has currently been retrieved.</param>
         /// <param name="target">The target login that the given login will be cast from. Returned as null if the login could not be converted.</param>
         /// <returns>Returns a new authentication result that represents the result of the processing if any issues were found with the given login, otherwise null.</returns>
-        protected AuthenticationResult ProcessBasicLogin<TTargetLogin>(ILogin<TAccount, TDateTime> login, out TTargetLogin target)
+        protected AuthenticationResult ProcessBasicLogin<TTargetLogin>(Login<TAccount, TDateTime> login, out TTargetLogin target)
             where TTargetLogin : class, ILogin<TAccount, TDateTime>
         {
             target = login as TTargetLogin;
@@ -108,7 +109,7 @@ namespace RealMembership
         /// </summary>
         /// <param name="login">The login that should be processed.</param>
         /// <returns>Returns a new <see cref="AuthenticationResult"/> that represents the problem that was found with the login, if not problems were found then null.</returns>
-        protected AuthenticationResult ProcessBasicLogin(ILogin<TAccount, TDateTime> login)
+        protected AuthenticationResult ProcessBasicLogin(Login<TAccount, TDateTime> login)
         {
             if (login == null)
                 return AuthenticationResult.NotFound;
@@ -122,7 +123,7 @@ namespace RealMembership
                 return null;
         }
 
-        protected AuthenticationResult ProcessTwoFactor(bool success, ILogin<TAccount, TDateTime> login)
+        protected AuthenticationResult ProcessTwoFactor(bool success, Login<TAccount, TDateTime> login)
         {
             if (success)
                 if (login.Account.RequiresTwoFactorAuth)
@@ -161,7 +162,7 @@ namespace RealMembership
         {
             AuthenticationResult result;
             var login = await Repository.GetLoginByEmailAsync(tenant, email);
-            IEmailPasswordLogin<TAccount, TDateTime> passwordLogin;
+            PasswordLogin<TAccount, TDateTime> passwordLogin;
             if ((result = ProcessBasicLogin(login, out passwordLogin)) == null)
             {
                 result = ProcessTwoFactor(await passwordLogin.MatchesPasswordAsync(password), passwordLogin);
@@ -173,11 +174,10 @@ namespace RealMembership
         /// <summary>
         /// Authenticates the given code against the given login and returns the result of the authentication attempt.
         /// </summary>
-        /// <param name="tenant">The tenant that the user is trying to authenticate against.</param>
         /// <param name="login">The login to authenticate against.</param>
         /// <param name="code">The code that should be used for the credentials of the authentication.</param>
         /// <returns></returns>
-        public virtual Task<AuthenticationResult> AuthenticateWithLoginAsync(IPhoneLogin<TAccount, TDateTime> login, string code)
+        public virtual Task<AuthenticationResult> AuthenticateWithLoginAsync(PhoneLogin<TAccount, TDateTime> login, string code)
         {
             throw new NotImplementedException();
         }
@@ -185,11 +185,10 @@ namespace RealMembership
         /// <summary>
         /// Authenticates the given password against the given login and returns the result of the authentication attempt.
         /// </summary>
-        /// <param name="tenant">The tenant that the user is trying to authenticate against.</param>
         /// <param name="login">The login to authenticate against.</param>
         /// <param name="password">The password that should be used for the credentials of the authentication.</param>
         /// <returns></returns>
-        public async Task<AuthenticationResult> AuthenticateWithLoginAsync(IPasswordLogin<TAccount, TDateTime> login, string password)
+        public async Task<AuthenticationResult> AuthenticateWithLoginAsync(PasswordLogin<TAccount, TDateTime> login, string password)
         {
             AuthenticationResult result;
             if ((result = ProcessBasicLogin(login)) == null)
@@ -232,7 +231,7 @@ namespace RealMembership
         /// <param name="tenant">The name of the tenant that the account should be retrieved from.</param>
         /// <param name="email">The email address of the user that should be retrieved.</param>
         /// <returns></returns>
-        public Task<IEmailLogin<TAccount, TDateTime>> GetLoginByEmailAsync(string tenant, string email)
+        public Task<EmailLogin<TAccount, TDateTime>> GetLoginByEmailAsync(string tenant, string email)
         {
             return Repository.GetLoginByEmailAsync(tenant, email);
         }
@@ -244,7 +243,7 @@ namespace RealMembership
         /// <param name="username">The username of the user that should be retrieved.</param>
         /// <returns></returns>
 
-        public Task<IUsernameLogin<TAccount, TDateTime>> GetLoginByUsernameAsync(string tenant, string username)
+        public Task<UsernameLogin<TAccount, TDateTime>> GetLoginByUsernameAsync(string tenant, string username)
         {
             return Repository.GetLoginByUsernameAsync(tenant, username);
         }
@@ -252,7 +251,7 @@ namespace RealMembership
         /// <summary>
         /// Gets the user with the given ID.
         /// </summary>
-        /// <param name="id">The ID of the user that should be retrieved./param>
+        /// <param name="id">The ID of the user that should be retrieved.</param>
         /// <param name="tenant">The name of the tenant that the account should be retrieved from.</param>
         /// <returns></returns>
         public Task<TAccount> GetUserByIdAsync(string tenant, long id)
@@ -274,17 +273,6 @@ namespace RealMembership
             {
                 result = new PasswordResetFinishResult<TAccount, TDateTime>
                 {
-                    Login = null,
-                    Successful = false,
-                    SetPasswordResult = null,
-                    GeneralResult = PasswordResetFinishType.InvalidCode
-                };
-            }
-            else if (!await login.MatchesResetCodeAsync(code))
-            {
-                result = new PasswordResetFinishResult<TAccount, TDateTime>
-                {
-                    Login = login,
                     Successful = false,
                     SetPasswordResult = null,
                     GeneralResult = PasswordResetFinishType.InvalidCode
@@ -295,7 +283,6 @@ namespace RealMembership
                 var passwordSetResult = await login.SetPasswordAsync(newPassword);
                 result = new PasswordResetFinishResult<TAccount, TDateTime>
                 {
-                    Login = login,
                     Successful = passwordSetResult.Successful,
                     GeneralResult = passwordSetResult.Successful ? PasswordResetFinishType.PasswordReset : PasswordResetFinishType.InvalidPassword,
                     SetPasswordResult = passwordSetResult
@@ -308,12 +295,12 @@ namespace RealMembership
         /// <summary>
         /// Requests a password reset for the login contained by the given tenant with the given email.
         /// </summary>
-        /// <param param name="email">The email address of the login that the password request is for.</param>
+        /// <param name="email">The email address of the login that the password request is for.</param>
         /// <param name="tenant">The tenant that the login should be retrieved from.</param>
         /// <returns></returns>
         public virtual async Task<PasswordResetRequestResult> RequestEmailPasswordResetAsync(string tenant, string email)
         {
-            IPasswordLogin<TAccount, TDateTime> login = await Repository.GetLoginByEmailAsync(tenant, email) as IPasswordLogin<TAccount, TDateTime>;
+            PasswordLogin<TAccount, TDateTime> login = await Repository.GetLoginByEmailAsync(tenant, email) as PasswordLogin<TAccount, TDateTime>;
             PasswordResetRequestResult result = await RequestPasswordResetAsync(login);
             await Repository.RecordAttemptForPasswordResetAsync(tenant, email, IdentificationType.Email, result, login);
             return result;
@@ -327,7 +314,7 @@ namespace RealMembership
         /// <returns></returns>
         public virtual async Task<PasswordResetRequestResult> RequestUsernamePasswordResetAsync(string tenant, string username)
         {
-            IPasswordLogin<TAccount, TDateTime> login = await Repository.GetLoginByUsernameAsync(tenant, username);
+            PasswordLogin<TAccount, TDateTime> login = await Repository.GetLoginByUsernameAsync(tenant, username);
             PasswordResetRequestResult result = await RequestPasswordResetAsync(login);
             await Repository.RecordAttemptForPasswordResetAsync(tenant, username, IdentificationType.Username, result, login);
             return result;
@@ -374,7 +361,7 @@ namespace RealMembership
         public async Task<VerificationResult> VerifyLoginWithCodeAsync(string code)
         {
             VerificationResult result;
-            ILogin<TAccount, TDateTime> login = await Repository.GetLoginByVerificationCodeAsync(code);
+            Login<TAccount, TDateTime> login = await Repository.GetLoginByVerificationCodeAsync(code);
             if (login == null)
             {
                 result = new VerificationResult
@@ -399,7 +386,7 @@ namespace RealMembership
         /// <returns>Returns a new awaitable task that results in a new <see cref="VerificationRequestResult"/> that represents the result of the request.</returns>
         public async Task<VerificationRequestResult> RequestNewEmailVerificationCodeAsync(string tenant, string email)
         {
-            IEmailLogin<TAccount, TDateTime> login = await GetLoginByEmailAsync(tenant, email);
+            EmailLogin<TAccount, TDateTime> login = await GetLoginByEmailAsync(tenant, email);
             VerificationRequestResult result;
             if (login == null)
             {
@@ -436,7 +423,7 @@ namespace RealMembership
         /// </returns>
         public async virtual Task<VerificationRequestResult> RequestNewSmsVerificationCodeAsync(string tenant, string phoneNumber)
         {
-            IPhoneLogin<TAccount, TDateTime> login = await Repository.GetLoginByPhoneAsync(tenant, phoneNumber);
+            PhoneLogin<TAccount, TDateTime> login = await Repository.GetLoginByPhoneAsync(tenant, phoneNumber);
             VerificationRequestResult result;
             if (login == null)
             {

@@ -43,6 +43,16 @@ namespace RealMembership
         }
         
         /// <summary>
+        /// Gets or sets the ID of this claim.
+        /// </summary>
+        /// <returns></returns>
+        public long Id
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// Gets or sets the type of the claim. What sort of value that the claim represents.
         /// </summary>
         [Required(AllowEmptyStrings = false)]
@@ -88,7 +98,7 @@ namespace RealMembership
         /// <summary>
         /// Determines whether the specified <see cref="IClaim" />, is equal to this instance.
         /// </summary>
-        /// <param name="obj">The <see cref="IClaim" /> to compare with this instance.</param>
+        /// <param name="other">The <see cref="IClaim" /> to compare with this instance.</param>
         /// <returns>
         ///   <c>true</c> if the specified <see cref="IClaim" /> is equal to this instance; otherwise, <c>false</c>.
         /// </returns>

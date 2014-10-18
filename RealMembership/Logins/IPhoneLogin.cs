@@ -36,7 +36,5 @@ namespace RealMembership.Logins
             get;
             set;
         }
-
-
     }
 }

@@ -12,6 +12,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
+using RealMembership.Logins.SecurityEvents;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -25,13 +26,12 @@ namespace RealMembership.Logins
         where TAccount : IUserAccount<TAccount, TDate> 
         where TDate : struct
     {
-
         /// <summary>
-        /// Gets the collection of login attempts that have been made against this login.
-        /// If null then login attempts should not be recorded.
+        /// Gets the collection of security events that have occured for this login.
+        /// If null then security should not be recorded.
         /// </summary>
         /// <returns></returns>
-        ICollection<ILoginAttempt<TAccount, TDate>> LoginAttempts
+        ICollection<LoginSecurityEvent<TAccount, TDate>> SecurityEvents
         {
             get;
         }

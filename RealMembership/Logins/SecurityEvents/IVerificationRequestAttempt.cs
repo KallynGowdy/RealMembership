@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RealMembership.Logins
+namespace RealMembership.Logins.SecurityEvents
 {
     /// <summary>
     /// Defines an interface for objects that represents an audit of the process of verifiying a login.
@@ -14,10 +14,20 @@ namespace RealMembership.Logins
         where TDateTime : struct
     {
         /// <summary>
+        /// Gets or sets the time that the verification process was finished at.
+        /// </summary>
+        /// <returns></returns>
+        TDateTime? FinishTime
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// Gets or sets the result of the verification code request attempt.
         /// </summary>
         /// <returns></returns>
-        VerificationRequestResultType? RequestAttemptResult
+        VerificationRequestResult RequestAttemptResult
         {
             get;
             set;
@@ -27,7 +37,7 @@ namespace RealMembership.Logins
         /// Gets or sets the result of the verification attempt. The attempt of trying to verify the login with a code.
         /// </summary>
         /// <returns></returns>
-        VerificationResultType? VerificationAttemptResult
+        VerificationResult VerificationAttemptResult
         {
             get;
             set;

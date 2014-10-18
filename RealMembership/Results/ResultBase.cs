@@ -12,6 +12,16 @@ namespace RealMembership
     public abstract class ResultBase : IResult
     {
         /// <summary>
+        /// Gets or sets the ID of the result.
+        /// </summary>
+        /// <returns></returns>
+        public virtual long Id
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// Gets or sets the message that describes the result.
         /// </summary>
         public virtual string Message { get; set; }

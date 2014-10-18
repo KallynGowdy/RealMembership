@@ -68,20 +68,18 @@ namespace RealMembership
         /// Gets or sets the list of logins that this account has.
         /// </summary>
         /// <returns></returns>
-        ICollection<ILogin<TAccount, TDateTime>> Logins
+        ICollection<Login<TAccount, TDateTime>> Logins
         {
             get;
-            set;
         }
 
         /// <summary>
         /// Gets or sets the list of claims that this account has.
         /// </summary>
         /// <returns></returns>
-        ICollection<IClaim> Claims
+        ICollection<Claim> Claims
         {
             get;
-            set;
         }
 
         /// <summary>

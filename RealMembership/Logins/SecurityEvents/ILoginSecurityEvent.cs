@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RealMembership.Logins
+namespace RealMembership.Logins.SecurityEvents
 {
     /// <summary>
     /// Defines an interface for objects that represent a security event that occured for an account.

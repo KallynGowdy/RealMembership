@@ -31,7 +31,7 @@ namespace RealMembership
         /// <summary>
         /// Gets the user with the given ID.
         /// </summary>
-        /// <param name="id">The ID of the user that should be retrieved./param>
+        /// <param name="id">The ID of the user that should be retrieved.</param>
         /// <param name="tenant">The name of the tenant that the account should be retrieved from.</param>
         /// <returns></returns>
         Task<TAccount> GetUserByIdAsync(string tenant, long id);
@@ -42,7 +42,7 @@ namespace RealMembership
         /// <param name="tenant">The name of the tenant that the account should be retrieved from.</param>
         /// <param name="email">The email address of the user that should be retrieved.</param>
         /// <returns></returns>
-        Task<IEmailLogin<TAccount, TDateTime>> GetLoginByEmailAsync(string tenant, string email);
+        Task<EmailLogin<TAccount, TDateTime>> GetLoginByEmailAsync(string tenant, string email);
 
         /// <summary>
         /// Gets the user that belongs to the given tenant with the given username.
@@ -50,7 +50,7 @@ namespace RealMembership
         /// <param name="tenant">The name of the tenant that the account should be retrieved from.</param>
         /// <param name="username">The username of the user that should be retrieved.</param>
         /// <returns></returns>
-        Task<IUsernameLogin<TAccount, TDateTime>> GetLoginByUsernameAsync(string tenant, string username);
+        Task<UsernameLogin<TAccount, TDateTime>> GetLoginByUsernameAsync(string tenant, string username);
 
         /// <summary>
         /// Creates a new account using the given account model and returns the result.
@@ -62,7 +62,7 @@ namespace RealMembership
         /// <summary>
         /// Requests a password reset for the login contained by the given tenant with the given email.
         /// </summary>
-        /// <param param name="email">The email address of the login that the password request is for.</param>
+        /// <param name="email">The email address of the login that the password request is for.</param>
         /// <param name="tenant">The tenant that the login should be retrieved from.</param>
         /// <returns></returns>
         Task<PasswordResetRequestResult> RequestEmailPasswordResetAsync(string tenant, string email);
@@ -70,7 +70,8 @@ namespace RealMembership
         /// <summary>
         /// Requests a password reset for the login contained by the given tenant with the given username.
         /// </summary>
-        /// <param name="login">The login that the password reset is for.</param>
+        /// <param name="username">The username of the login that the password reset should be for.</param>
+        /// <param name="tenant">The tenant that the login should be retrieved from.</param>
         /// <returns></returns>
         Task<PasswordResetRequestResult> RequestUsernamePasswordResetAsync(string tenant, string username);
 
@@ -103,20 +104,18 @@ namespace RealMembership
         /// <summary>
         /// Authenticates the given password against the given login and returns the result of the authentication attempt.
         /// </summary>
-        /// <param name="tenant">The tenant that the user is trying to authenticate against.</param>
         /// <param name="login">The login to authenticate against.</param>
         /// <param name="password">The password that should be used for the credentials of the authentication.</param>
         /// <returns></returns>
-        Task<AuthenticationResult> AuthenticateWithLoginAsync(IPasswordLogin<TAccount, TDateTime> login, string password);
+        Task<AuthenticationResult> AuthenticateWithLoginAsync(PasswordLogin<TAccount, TDateTime> login, string password);
 
         /// <summary>
         /// Authenticates the given code against the given login and returns the result of the authentication attempt.
         /// </summary>
-        /// <param name="tenant">The tenant that the user is trying to authenticate against.</param>
         /// <param name="login">The login to authenticate against.</param>
         /// <param name="code">The code that should be used for the credentials of the authentication.</param>
         /// <returns></returns>
-        Task<AuthenticationResult> AuthenticateWithLoginAsync(IPhoneLogin<TAccount, TDateTime> login, string code);
+        Task<AuthenticationResult> AuthenticateWithLoginAsync(PhoneLogin<TAccount, TDateTime> login, string code);
 
         /// <summary>
         /// Authenticates the given email and code against the given tenant and returns the result of the authentication attempt.

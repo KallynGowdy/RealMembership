@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RealMembership.Logins
+namespace RealMembership.Logins.SecurityEvents
 {
     /// <summary>
     /// Defines an interface that represents an audit of an attempt to reset the password of a login.
@@ -14,11 +14,21 @@ namespace RealMembership.Logins
         where TDateTime : struct
     {
         /// <summary>
+        /// Gets or sets the time that the password reset process was finished at.
+        /// </summary>
+        /// <returns></returns>
+        TDateTime? FinishTime
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// Gets or sets the result for the first phase of the password reset process. 
         /// The result that came of the request for the password reset code.
         /// </summary>
         /// <returns></returns>
-        PasswordResetRequestResultType? RequestCodeResult
+        PasswordResetRequestResult RequestCodeResult
         {
             get;
             set;
@@ -30,7 +40,7 @@ namespace RealMembership.Logins
         /// Null if this phase has not been reached yet.
         /// </summary>
         /// <returns></returns>
-        PasswordResetFinishType? FinishResetResult
+        PasswordResetFinishResult<TAccount, TDateTime> FinishResetResult
         {
             get;
             set;

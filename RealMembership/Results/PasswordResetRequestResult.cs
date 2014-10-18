@@ -50,10 +50,10 @@ namespace RealMembership
     public enum PasswordResetRequestResultType
     {
         /// <summary>
-        /// Defines that the reset process was started successfully.
+        /// Defines that the reset process was started successfully and a new password reset code was issued.
         /// </summary>
         [Description("The verification code has been sent.")]
-        Success,
+        ResetCodeIssued,
 
         /// <summary>
         /// Defines that the login that the password reset was requested for is non-existant.

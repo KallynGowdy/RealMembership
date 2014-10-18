@@ -25,17 +25,6 @@ namespace RealMembership
         where TDateTime : struct
     {
         /// <summary>
-        /// Gets or sets the login that the reset was for.
-        /// Null if not sucessful.
-        /// </summary>
-        /// <returns></returns>
-        public IPasswordLogin<TAccount, TDateTime> Login
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
         /// Gets or sets the <see cref="SetPasswordResult"/> that was the result of the password reset process.
         /// </summary>
         /// <returns></returns>

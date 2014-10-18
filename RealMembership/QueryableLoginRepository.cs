@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using RealMembership.Logins;
 using System.Linq.Expressions;
+using RealMembership.Logins.SecurityEvents;
 
 namespace RealMembership
 {
@@ -16,24 +17,54 @@ namespace RealMembership
         where TDateTime : struct
     {
         /// <summary>
-        /// Gets or sets the queryable list of accounts that this repository has access to.
+        /// Gets the queryable list of logins that this repository has access to.
         /// </summary>
         /// <returns></returns>
-        protected IQueryable<TAccount> Accounts
+        protected abstract IQueryable<Login<TAccount, TDateTime>> Logins
         {
             get;
-            set;
+        }
+
+        /// <summary>
+        /// Gets the queryable list of accounts that this repository has access to.
+        /// </summary>
+        /// <returns></returns>
+        protected abstract IQueryable<TAccount> Accounts
+        {
+            get;
         }
 
         #region Expressions
+        /// <summary>
+        /// Gets an expression that represents a comparision between a login security event's tenant and the given tenant.
+        /// </summary>
+        /// <param name="tenant"></param>
+        /// <returns></returns>
+        protected static Expression<Func<TEvent, bool>> WhereTenantEqualsForSecurityEventExpression<TEvent>(string tenant)
+            where TEvent : LoginSecurityEvent<TAccount, TDateTime>
+        {
+            return (e) => string.Equals(e.Tenant, tenant, StringComparison.InvariantCultureIgnoreCase);
+        }
+
         /// <summary>
         /// Gets an expression that represents a comparision between an account's tenant and the given tenant.
         /// </summary>
         /// <param name="tenant"></param>
         /// <returns></returns>
-        protected static Expression<Func<TAccount, bool>> WhereTenantEqualsExpression(string tenant)
+        protected virtual Expression<Func<TAccount, bool>> WhereTenantEqualsForAccountExpression(string tenant)
         {
             return (a) => a.Tenant.Equals(tenant, StringComparison.InvariantCultureIgnoreCase);
+        }
+
+        /// <summary>
+        /// Gets an expression that represents a comparision between an account's tenant and the given tenant.
+        /// </summary>
+        /// <param name="tenant"></param>
+        /// <returns></returns>
+        protected virtual Expression<Func<TLogin, bool>> WhereTenantEqualsForLoginExpression<TLogin>(string tenant)
+            where TLogin : Login<TAccount, TDateTime>
+        {
+            return (l) => l.Account.Tenant.Equals(tenant, StringComparison.InvariantCultureIgnoreCase);
         }
 
         /// <summary>
@@ -41,7 +72,7 @@ namespace RealMembership
         /// </summary>
         /// <param name="email"></param>
         /// <returns></returns>
-        protected static Expression<Func<IEmailLogin<TAccount, TDateTime>, bool>> WhereEmailEqualsExpression(string email)
+        protected virtual Expression<Func<EmailLogin<TAccount, TDateTime>, bool>> WhereEmailEqualsExpression(string email)
         {
             return (e) => e.EmailAddress.Equals(email, StringComparison.InvariantCultureIgnoreCase);
         }
@@ -51,7 +82,7 @@ namespace RealMembership
         /// </summary>
         /// <param name="phoneNumber"></param>
         /// <returns></returns>
-        protected static Expression<Func<IPhoneLogin<TAccount, TDateTime>, bool>> WherePhoneEqualsExpression(string phoneNumber)
+        protected virtual Expression<Func<PhoneLogin<TAccount, TDateTime>, bool>> WherePhoneEqualsExpression(string phoneNumber)
         {
             return (p) => p.PhoneNumber.Equals(phoneNumber, StringComparison.OrdinalIgnoreCase);
         }
@@ -61,7 +92,7 @@ namespace RealMembership
         /// </summary>
         /// <param name="username"></param>
         /// <returns></returns>
-        protected static Expression<Func<IUsernameLogin<TAccount, TDateTime>, bool>> WhereUsernameEqualsExpression(string username)
+        protected virtual Expression<Func<UsernameLogin<TAccount, TDateTime>, bool>> WhereUsernameEqualsExpression(string username)
         {
             return (u) => u.Username.Equals(username, StringComparison.InvariantCultureIgnoreCase);
         }
@@ -73,7 +104,7 @@ namespace RealMembership
         /// </summary>
         /// <param name="id">The ID of the account that should be retrieved.</param>
         /// <returns>
-        /// Returns an awaitable task that results in the <see cref="TAccount" /> that has the given ID.
+        /// Returns an awaitable task that results in the <typeparamref name="TAccount" /> that has the given ID.
         /// </returns>
         public virtual Task<TAccount> GetAccountById(long id)
         {
@@ -86,13 +117,13 @@ namespace RealMembership
         /// <param name="tenant">The tenant that the login belongs to.</param>
         /// <param name="email">The email address of the login to retrieve.</param>
         /// <returns></returns>
-        public virtual Task<IEmailLogin<TAccount, TDateTime>> GetLoginByEmailAsync(string tenant, string email)
+        public virtual Task<EmailLogin<TAccount, TDateTime>> GetLoginByEmailAsync(string tenant, string email)
         {
             return Task.FromResult(
-                Accounts
-                .Where(WhereTenantEqualsExpression(tenant))
-                .SelectMany(a => a.Logins.OfType<IEmailLogin<TAccount, TDateTime>>())
-                .SingleOrDefault(WhereEmailEqualsExpression(email)));
+                Logins
+                .OfType<EmailLogin<TAccount, TDateTime>>()
+                .Where(WhereEmailEqualsExpression(email))
+                .SingleOrDefault(WhereTenantEqualsForLoginExpression<EmailLogin<TAccount,TDateTime>>(tenant)));
         }
 
         /// <summary>
@@ -101,12 +132,13 @@ namespace RealMembership
         /// <param name="tenant">The tenant that the login belongs to.</param>
         /// <param name="phoneNumber">The phone number of the login to retrieve.</param>
         /// <returns></returns>
-        public virtual Task<IPhoneLogin<TAccount, TDateTime>> GetLoginByPhoneAsync(string tenant, string phoneNumber)
+        public virtual Task<PhoneLogin<TAccount, TDateTime>> GetLoginByPhoneAsync(string tenant, string phoneNumber)
         {
             return Task.FromResult(
-                Accounts.Where(WhereTenantEqualsExpression(tenant))
-                .SelectMany(a => a.Logins.OfType<IPhoneLogin<TAccount, TDateTime>>())
-                .SingleOrDefault(WherePhoneEqualsExpression(phoneNumber)));
+                Logins
+                .OfType<PhoneLogin<TAccount, TDateTime>>()
+                .Where(WherePhoneEqualsExpression(phoneNumber))
+                .SingleOrDefault(WhereTenantEqualsForLoginExpression<PhoneLogin<TAccount, TDateTime>>(tenant)));
         }
 
 
@@ -117,16 +149,24 @@ namespace RealMembership
         /// <param name="tenant">The tenant that the login belongs to.</param>
         /// <param name="username">The username of the login to retrieve.</param>
         /// <returns></returns>
-        public Task<IUsernameLogin<TAccount, TDateTime>> GetLoginByUsernameAsync(string tenant, string username)
+        public virtual Task<UsernameLogin<TAccount, TDateTime>> GetLoginByUsernameAsync(string tenant, string username)
         {
             return Task.FromResult(
-                Accounts.Where(WhereTenantEqualsExpression(tenant))
-                .SelectMany(a => a.Logins.OfType<IUsernameLogin<TAccount, TDateTime>>())
-                .SingleOrDefault(WhereUsernameEqualsExpression(username)));
+                Logins
+                .OfType<UsernameLogin<TAccount, TDateTime>>()
+                .Where(WhereUsernameEqualsExpression(username))
+                .SingleOrDefault(WhereTenantEqualsForLoginExpression<UsernameLogin<TAccount, TDateTime>>(tenant)));
         }
-        #endregion
 
-        #region Not Implemented
+        /// <summary>
+        /// Gets the login that currently posseses the given verification code.
+        /// </summary>
+        /// <param name="code">The code that is contained in the login that should be retrieved.</param>
+        /// <returns></returns>
+        public virtual Task<Login<TAccount, TDateTime>> GetLoginByVerificationCodeAsync(string code)
+        {
+            return Task.FromResult(Logins.SingleOrDefault(l => l.VerificationCode.Equals(code, StringComparison.Ordinal)));
+        }
 
         /// <summary>
         /// Gets the login that contains the given password reset code. Returns null if it doesn't exist.
@@ -135,19 +175,25 @@ namespace RealMembership
         /// <returns>
         /// Returns an awaitable task that results in the <see cref="IPasswordLogin{TAccount, TDate}" /> that has the given code.
         /// </returns>
-        public abstract Task<IPasswordLogin<TAccount, TDateTime>> GetLoginByResetCodeAsync(string code);
+        public virtual Task<PasswordLogin<TAccount, TDateTime>> GetLoginByResetCodeAsync(string code)
+        {
+            string codeHash = PasswordLogin<TAccount, TDateTime>.GetCodeHash(code);
+            return Task.FromResult(
+                Logins.OfType<PasswordLogin<TAccount, TDateTime>>()
+                .SingleOrDefault(l => l.ResetCodeHash.Equals(codeHash, StringComparison.Ordinal)));
+        }
+        #endregion
 
-        public abstract Task<ILogin<TAccount, TDateTime>> GetLoginByVerificationCodeAsync(string code);
+        #region Not Implemented
+        public abstract Task<LoginAttempt<TAccount, TDateTime>> RecordAttemptForLoginAsync(string tenant, string identification, IdentificationType? identificationType, AuthenticationResult result, Login<TAccount, TDateTime> login);
 
-        public abstract Task<ILoginAttempt<TAccount, TDateTime>> RecordAttemptForLoginAsync(string tenant, string identification, IdentificationType? identificationType, AuthenticationResult result, ILogin<TAccount, TDateTime> login);
+        public abstract Task<VerificationRequestAttempt<TAccount, TDateTime>> RecordAttemptForLoginVerificationAsync(string tenant, string identification, IdentificationType? identificationType, VerificationResult result, Login<TAccount, TDateTime> login);
 
-        public abstract Task<IVerificationRequestAttempt<TAccount, TDateTime>> RecordAttemptForLoginVerificationAsync(string tenant, string identification, IdentificationType? identificationType, VerificationResult result, ILogin<TAccount, TDateTime> login);
+        public abstract Task<VerificationRequestAttempt<TAccount, TDateTime>> RecordAttemptForLoginVerificationAsync(string tenant, string identification, IdentificationType? identificationType, VerificationRequestResult result, Login<TAccount, TDateTime> login);
 
-        public abstract Task<IVerificationRequestAttempt<TAccount, TDateTime>> RecordAttemptForLoginVerificationAsync(string tenant, string identification, IdentificationType? identificationType, VerificationRequestResult result, ILogin<TAccount, TDateTime> login);
+        public abstract Task<PasswordResetAttempt<TAccount, TDateTime>> RecordAttemptForPasswordResetAsync(string tenant, string identification, IdentificationType? identificationType, PasswordResetFinishResult<TAccount, TDateTime> result, PasswordLogin<TAccount, TDateTime> login);
 
-        public abstract Task<IPasswordResetAttempt<TAccount, TDateTime>> RecordAttemptForPasswordResetAsync(string tenant, string identification, IdentificationType? identificationType, PasswordResetFinishResult<TAccount, TDateTime> result, IPasswordLogin<TAccount, TDateTime> login);
-
-        public abstract Task<IPasswordResetAttempt<TAccount, TDateTime>> RecordAttemptForPasswordResetAsync(string tenant, string identification, IdentificationType? identificationType, PasswordResetRequestResult result, IPasswordLogin<TAccount, TDateTime> login);
+        public abstract Task<PasswordResetAttempt<TAccount, TDateTime>> RecordAttemptForPasswordResetAsync(string tenant, string identification, IdentificationType? identificationType, PasswordResetRequestResult result, PasswordLogin<TAccount, TDateTime> login);
 
         public abstract Task CreateAccountAsync(TAccount account); 
         #endregion

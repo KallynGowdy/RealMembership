@@ -37,7 +37,7 @@ namespace RealMembership.Logins
         }
 
         /// <summary>
-        /// Gets or sets the time that the password reset was requested.
+        /// Gets the time that the password reset was requested.
         /// </summary>
         /// <returns></returns>
         TDate? ResetRequestTime
@@ -46,21 +46,22 @@ namespace RealMembership.Logins
         }
 
         /// <summary>
-        /// Gets the time that the password reset code expires.
+        /// Gets or sets the time that the password reset code expires.
         /// </summary>
         /// <returns></returns>
         TDate? ResetExpireTime
         {
-            get;            
+            get;
         }
 
         /// <summary>
-        /// Determines if the given reset code matches the reset code stored in this login.
-        /// Should return false if the reset has expired or was not requested.
+        /// Gets the hashed reset code that is being used in the password reset process.
         /// </summary>
-        /// <param name="code">The code to validated against the stored code.</param>
-        /// <returns><c>true</c> if the code is valid for this login, otherwise <c>false</c></returns>
-        Task<bool> MatchesResetCodeAsync(string code);
+        /// <returns></returns>
+        string ResetCodeHash
+        {
+            get;
+        }
 
         /// <summary>
         /// Requests a new password reset code for this login.

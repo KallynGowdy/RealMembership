@@ -20,6 +20,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Debug\RealMembership.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -36,11 +37,25 @@
     <Reference Include="System.IdentityModel" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CollectionHelpers\DerivedCollectionWrapper.cs" />
     <Compile Include="EmailMessage.cs" />
     <Compile Include="IMessageFormatter.cs" />
-    <Compile Include="Logins\ILoginSecurityEvent.cs" />
-    <Compile Include="Logins\IPasswordResetAttempt.cs" />
-    <Compile Include="Logins\IVerificationRequestAttempt.cs" />
+    <Compile Include="Implementation\Default\Logins\EmailLogin.cs" />
+    <Compile Include="Implementation\Default\Logins\LoginAttempt.cs" />
+    <Compile Include="Implementation\Default\Logins\PasswordLogin.cs" />
+    <Compile Include="Implementation\Default\Logins\PasswordResetAttempt.cs" />
+    <Compile Include="Implementation\Default\Logins\UsernameLogin.cs" />
+    <Compile Include="Implementation\Default\Logins\VerificationRequestAttempt.cs" />
+    <Compile Include="Implementation\Default\QueryableLoginRepository.cs" />
+    <Compile Include="Logins\SecurityEvents\ILoginSecurityEvent.cs" />
+    <Compile Include="Logins\SecurityEvents\IPasswordResetAttempt.cs" />
+    <Compile Include="Logins\SecurityEvents\IVerificationRequestAttempt.cs" />
+    <Compile Include="Logins\SecurityEvents\LoginAttempt.cs" />
+    <Compile Include="Logins\SecurityEvents\LoginSecurityEvent.cs" />
+    <Compile Include="Logins\SecurityEvents\PasswordResetAttempt.cs" />
+    <Compile Include="Logins\SecurityEvents\VerificationRequestAttempt.cs" />
+    <Compile Include="Logins\UsernameLogin.cs" />
+    <Compile Include="Logins\PhoneLogin.cs" />
     <Compile Include="QueryableLoginRepository.cs" />
     <Compile Include="Results\AccountCreationResult.cs" />
     <Compile Include="Results\AuthenticationResult.cs" />
@@ -56,7 +71,7 @@
     <Compile Include="Logins\IEmailLogin.cs" />
     <Compile Include="IHasId.cs" />
     <Compile Include="Logins\IEmailPasswordLogin.cs" />
-    <Compile Include="Logins\ILoginAttempt.cs" />
+    <Compile Include="Logins\SecurityEvents\ILoginAttempt.cs" />
     <Compile Include="Logins\IPasswordLogin.cs" />
     <Compile Include="Logins\IPhoneLogin.cs" />
     <Compile Include="IResult.cs" />

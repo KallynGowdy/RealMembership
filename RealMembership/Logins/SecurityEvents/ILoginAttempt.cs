@@ -12,7 +12,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-namespace RealMembership.Logins
+namespace RealMembership.Logins.SecurityEvents
 {
     /// <summary>
     /// Defines an interface for objects that record information about attempted logins.
@@ -24,10 +24,20 @@ namespace RealMembership.Logins
         where TDateTime : struct
     {
         /// <summary>
+        /// Gets or sets the ID of the login attempt.
+        /// </summary>
+        /// <returns></returns>
+        long Id
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// Gets or sets the result that occured from the login attempt.
         /// </summary>
         /// <returns></returns>
-        AuthenticationResultType Result
+        AuthenticationResult Result
         {
             get;
             set;

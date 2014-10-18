@@ -12,6 +12,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
+using RealMembership.CollectionHelpers;
 using RealMembership.Logins;
 using System;
 using System.Collections.Generic;
@@ -23,20 +24,21 @@ using System.Threading.Tasks;
 namespace RealMembership
 {
     /// <summary>
-    /// Defines an abstract base class that implements <see cref="IUserAccount{TDateTime}" />.
+    /// Defines an abstract base class that implements <see cref="IUserAccount{TAccount, TDateTime}" />.
     /// </summary>
+    /// <typeparam name="TAccount">The type of the accounts used.</typeparam>
     /// <typeparam name="TDate">The type of the date.</typeparam>
-    public abstract class UserAccount<TAccount, TDate> : IUserAccount<TAccount, TDate> 
+    public abstract class UserAccount<TAccount, TDate> : IUserAccount<TAccount, TDate>
         where TAccount : UserAccount<TAccount, TDate>
         where TDate : struct
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="UserAccount{TDate}"/> class.
+        /// Initializes a new instance of the <see cref="UserAccount{TAccount, TDate}"/> class.
         /// </summary>
         protected UserAccount()
         {
-            this.Logins = new List<ILogin<TAccount, TDate>>();
-            this.Claims = new List<IClaim>();
+            this.Logins = new List<Login<TAccount, TDate>>();
+            this.Claims = new List<Claim>();
         }
 
         /// <summary>
@@ -97,13 +99,13 @@ namespace RealMembership
         /// Gets or sets the collection of logins that this account has.
         /// </summary>
         /// <returns></returns>
-        public virtual ICollection<ILogin<TAccount, TDate>> Logins { get; set; }
+        public virtual ICollection<Login<TAccount, TDate>> Logins { get; set; }
 
         /// <summary>
         /// Gets or sets the collection of claims that this account has.
         /// </summary>
         /// <returns></returns>
-        public virtual ICollection<IClaim> Claims { get; set; }
+        public virtual ICollection<Claim> Claims { get; set; }
 
         /// <summary>
         /// Gets or sets the tenant that this account belongs to.
