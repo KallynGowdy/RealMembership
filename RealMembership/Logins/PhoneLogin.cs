@@ -4,16 +4,12 @@ using RealMembership.Logins;
 namespace RealMembership.Logins
 {
     /// <summary>
-    /// Defines an abstract class that provides a basic implementation of <see cref="IPhoneLogin{TAccount, TDateTime}"/>.
+    /// Defines an abstract class that provides a basic implementation of <see cref="IPhoneLogin"/>.
     /// </summary>
-    /// <typeparam name="TAccount">The type of the accounts being used.</typeparam>
-    /// <typeparam name="TDateTime">The type of dates being used.</typeparam>
-    public abstract class PhoneLogin<TAccount, TDateTime> : Login<TAccount, TDateTime>, IPhoneLogin<TAccount, TDateTime>
-        where TAccount : IUserAccount<TAccount, TDateTime>
-        where TDateTime : struct
+    public class PhoneLogin : Login, IPhoneLogin
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="PhoneLogin{TAccount, TDateTime}"/> class.
+        /// Initializes a new instance of the <see cref="PhoneLogin"/> class.
         /// </summary>
         /// <param name="phoneNumber">The phone number.</param>
         /// <exception cref="System.ArgumentException">The given phone number must not be null or whitespace.</exception>

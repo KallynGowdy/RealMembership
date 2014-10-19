@@ -9,15 +9,13 @@ namespace RealMembership.Logins.SecurityEvents
     /// <summary>
     /// Defines an interface for objects that represents an audit of the process of verifiying a login.
     /// </summary>
-    public interface IVerificationRequestAttempt<TAccount, TDateTime> : ILoginSecurityEvent<TAccount, TDateTime>
-        where TAccount : IUserAccount<TAccount, TDateTime>
-        where TDateTime : struct
+    public interface IVerificationRequestAttempt : ILoginSecurityEvent
     {
         /// <summary>
         /// Gets or sets the time that the verification process was finished at.
         /// </summary>
         /// <returns></returns>
-        TDateTime? FinishTime
+        DateTimeOffset? FinishTime
         {
             get;
             set;

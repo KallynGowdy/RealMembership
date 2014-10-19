@@ -22,16 +22,14 @@ namespace RealMembership.Logins
     /// <summary>
     /// Defines an interface that represents an authentication method for a user.
     /// </summary>
-    public interface ILogin<TAccount, TDate> : IHasId 
-        where TAccount : IUserAccount<TAccount, TDate> 
-        where TDate : struct
+    public interface ILogin : IHasId
     {
         /// <summary>
         /// Gets the collection of security events that have occured for this login.
         /// If null then security should not be recorded.
         /// </summary>
         /// <returns></returns>
-        ICollection<LoginSecurityEvent<TAccount, TDate>> SecurityEvents
+        ICollection<LoginSecurityEvent> SecurityEvents
         {
             get;
         }
@@ -80,13 +78,12 @@ namespace RealMembership.Logins
         }
 
         /// <summary>
-        /// Gets or sets the account that this login belongs to.
+        /// Gets the account that this login belongs to.
         /// </summary>
         /// <returns></returns>
-        TAccount Account
+        UserAccount Account
         {
             get;
-            set;
         }
     }
 }

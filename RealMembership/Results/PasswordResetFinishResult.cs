@@ -20,9 +20,7 @@ namespace RealMembership
     /// <summary>
     /// Defines a class that represents the result of finishing a password reset process.
     /// </summary>
-    public sealed class PasswordResetFinishResult<TAccount, TDateTime> : ResultBase
-        where TAccount : IUserAccount<TAccount, TDateTime>
-        where TDateTime : struct
+    public sealed class PasswordResetFinishResult : ResultBase
     {
         /// <summary>
         /// Gets or sets the <see cref="SetPasswordResult"/> that was the result of the password reset process.

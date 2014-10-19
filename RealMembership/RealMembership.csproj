@@ -39,6 +39,9 @@
   <ItemGroup>
     <Compile Include="AccountCreationRequest.cs" />
     <Compile Include="CollectionHelpers\DerivedCollectionWrapper.cs" />
+    <Compile Include="DefaultEmailService.cs" />
+    <Compile Include="DefaultMessageFormatter.cs" />
+    <Compile Include="DefaultPasswordValidator.cs" />
     <Compile Include="EmailAccountCreationRequest.cs" />
     <Compile Include="EmailAccountCreationResult.cs" />
     <Compile Include="EmailMessage.cs" />
@@ -73,7 +76,6 @@
     <Compile Include="Logins\IPhoneLogin.cs" />
     <Compile Include="IResult.cs" />
     <Compile Include="Logins\ITwoFactorLogin.cs" />
-    <Compile Include="IUserAccount.cs" />
     <Compile Include="Logins\ILogin.cs" />
     <Compile Include="Logins\IUsernameLogin.cs" />
     <Compile Include="IUserService.cs" />
@@ -92,9 +94,7 @@
     <Compile Include="UserService.cs" />
     <Compile Include="Results\VerificationResult.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Implementation\Default\Logins\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

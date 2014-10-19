@@ -23,9 +23,7 @@ namespace RealMembership.Logins
     /// <summary>
     /// Defines an interface for logins that require a password.
     /// </summary>
-    public interface IPasswordLogin<TAccount, TDate> : IEmailLogin<TAccount, TDate>
-        where TAccount : IUserAccount<TAccount, TDate>
-        where TDate : struct
+    public interface IPasswordLogin : IEmailLogin
     {
         /// <summary>
         /// Gets whether the password reset process is currently active for this login.
@@ -40,7 +38,7 @@ namespace RealMembership.Logins
         /// Gets the time that the password reset was requested.
         /// </summary>
         /// <returns></returns>
-        TDate? ResetRequestTime
+        DateTimeOffset? ResetRequestTime
         {
             get;
         }
@@ -49,7 +47,7 @@ namespace RealMembership.Logins
         /// Gets or sets the time that the password reset code expires.
         /// </summary>
         /// <returns></returns>
-        TDate? ResetExpireTime
+        DateTimeOffset? ResetExpireTime
         {
             get;
         }

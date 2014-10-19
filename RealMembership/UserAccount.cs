@@ -24,20 +24,16 @@ using System.Threading.Tasks;
 namespace RealMembership
 {
     /// <summary>
-    /// Defines an abstract base class that implements <see cref="IUserAccount{TAccount, TDateTime}" />.
+    /// Defines an abstract base class that implements <see cref="IUserAccount" />.
     /// </summary>
-    /// <typeparam name="TAccount">The type of the accounts used.</typeparam>
-    /// <typeparam name="TDate">The type of the date.</typeparam>
-    public abstract class UserAccount<TAccount, TDate> : IUserAccount<TAccount, TDate>
-        where TAccount : UserAccount<TAccount, TDate>
-        where TDate : struct
+    public class UserAccount
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="UserAccount{TAccount, TDate}"/> class.
+        /// Initializes a new instance of the <see cref="UserAccount"/> class.
         /// </summary>
         protected UserAccount()
         {
-            this.Logins = new List<Login<TAccount, TDate>>();
+            this.Logins = new List<Login>();
             this.Claims = new List<Claim>();
         }
 
@@ -55,7 +51,7 @@ namespace RealMembership
         {
             get
             {
-                return Logins.Any(l => l is ITwoFactorLogin<TAccount, TDate>);
+                return Logins.Any(l => l is ITwoFactorLogin);
             }
         }
 
@@ -63,19 +59,19 @@ namespace RealMembership
         /// Gets or sets the time that this account was created.
         /// </summary>
         /// <returns></returns>
-        public virtual TDate CreationTime { get; set; }
+        public virtual DateTimeOffset CreationTime { get; set; }
 
         /// <summary>
         /// Gets or sets the time that this account was last updated.
         /// </summary>
         /// <returns></returns>
-        public virtual TDate? TimeLastUpdated { get; set; }
+        public virtual DateTimeOffset? TimeLastUpdated { get; set; }
 
         /// <summary>
         /// Gets or sets the time that this account was deleted on, if it was deleted.
         /// </summary>
         /// <returns></returns>
-        public virtual TDate? DeletionTime { get; set; }
+        public virtual DateTimeOffset? DeletionTime { get; set; }
 
         /// <summary>
         /// Gets or sets the display name of this account.
@@ -99,7 +95,7 @@ namespace RealMembership
         /// Gets or sets the collection of logins that this account has.
         /// </summary>
         /// <returns></returns>
-        public virtual ICollection<Login<TAccount, TDate>> Logins { get; set; }
+        public virtual ICollection<Login> Logins { get; set; }
 
         /// <summary>
         /// Gets or sets the collection of claims that this account has.
@@ -122,12 +118,18 @@ namespace RealMembership
         /// Gets whether the user has been locked out of the account due to too many incorrect login attempts.
         /// </summary>
         /// <returns></returns>
-        public abstract bool IsLockedOut { get; }
+        public virtual bool IsLockedOut
+        {
+            get
+            {
+                return DateTimeOffset.Now < LockoutEndTime;
+            }
+        }
 
         /// <summary>
         /// Gets or sets the time that the lockout ends at.
         /// </summary>
         /// <returns></returns>
-        public abstract TDate? LockoutEndTime { get; set; }
+        public DateTimeOffset? LockoutEndTime { get; set; }
     }
 }

@@ -23,9 +23,7 @@ namespace RealMembership.Logins
     /// <summary>
     /// Defines a class that represents a user's login with an email address.
     /// </summary>
-    public interface IEmailLogin<TAccount, TDate> : ILogin<TAccount, TDate>
-        where TAccount : IUserAccount<TAccount, TDate>
-        where TDate : struct
+    public interface IEmailLogin : ILogin
     {
         /// <summary>
         /// Gets the email address of the user account.

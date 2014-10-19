@@ -7,11 +7,9 @@ using System.Threading.Tasks;
 namespace RealMembership.Logins.SecurityEvents
 {
     /// <summary>
-    /// Defines a class that provides an implementation of <see cref="ILoginAttempt{TAccount, TDateTime}"/>.
+    /// Defines a class that provides an implementation of <see cref="ILoginAttempt"/>.
     /// </summary>
-    public class LoginAttempt<TAccount, TDateTime> : LoginSecurityEvent<TAccount, TDateTime>, ILoginAttempt<TAccount, TDateTime>
-        where TAccount : IUserAccount<TAccount, TDateTime>
-        where TDateTime : struct
+    public class LoginAttempt : LoginSecurityEvent, ILoginAttempt
     {
         /// <summary>
         /// Gets the type of event that is being recorded.

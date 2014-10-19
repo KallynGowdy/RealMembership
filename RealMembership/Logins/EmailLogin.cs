@@ -22,27 +22,10 @@ using System.Threading.Tasks;
 namespace RealMembership.Logins
 {
     /// <summary>
-    /// Defines an abstract class that represents an <see cref="IEmailLogin{TAccount, TDate}"/>.
+    /// Defines an abstract class that represents an <see cref="IEmailLogin"/>.
     /// </summary>
-    public abstract class EmailLogin<TAccount, TDateTime> : Login<TAccount, TDateTime>, IEmailLogin<TAccount, TDateTime>
-        where TAccount : IUserAccount<TAccount, TDateTime>
-        where TDateTime : struct
+    public abstract class EmailLogin : Login, IEmailLogin
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="EmailLogin{TAccount, TDateTime}"/> class.
-        /// </summary>
-        /// <param name="email">The email.</param>
-        /// <exception cref="ArgumentException">Must not be null or just whitespace;email</exception>
-        protected EmailLogin(string email)
-        {
-            if (string.IsNullOrWhiteSpace(email)) throw new ArgumentException("Must not be null or just whitespace", "email");
-            this.EmailAddress = email;
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="EmailLogin{TAccount, TDateTime}"/> class.
-        /// </summary>
-        protected EmailLogin() { }
 
         /// <summary>
         /// Gets or sets the email address of the user account.

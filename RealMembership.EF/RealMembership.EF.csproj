@@ -49,17 +49,8 @@
   <ItemGroup>
     <Compile Include="DefaultPasswordValidator.cs" />
     <Compile Include="LoginRepository.cs" />
-    <Compile Include="Logins\EmailLogin.cs" />
-    <Compile Include="Logins\LoginAttempt.cs" />
-    <Compile Include="Logins\PasswordLogin.cs" />
-    <Compile Include="Logins\PasswordResetAttempt.cs" />
-    <Compile Include="Logins\UsernameLogin.cs" />
-    <Compile Include="Logins\VerificationRequestAttempt.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="QueryableLoginRepository.cs" />
-    <Compile Include="UserAccount.cs" />
     <Compile Include="UserAccountDbContext.cs" />
-    <Compile Include="UserService.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

@@ -7,11 +7,9 @@ using System.Threading.Tasks;
 namespace RealMembership.Logins.SecurityEvents
 {
     /// <summary>
-    /// Defines a class that provides a basic implementation of <see cref="IVerificationRequestAttempt{TAccount, TDateTime}"/>.
+    /// Defines a class that provides a basic implementation of <see cref="IVerificationRequestAttempt"/>.
     /// </summary>
-    public class VerificationRequestAttempt<TAccount, TDateTime> : LoginSecurityEvent<TAccount, TDateTime>, IVerificationRequestAttempt<TAccount, TDateTime>
-        where TAccount : IUserAccount<TAccount, TDateTime>
-        where TDateTime : struct
+    public class VerificationRequestAttempt : LoginSecurityEvent, IVerificationRequestAttempt
     {
         /// <summary>
         /// Gets the type of event that is being recorded.
@@ -56,7 +54,7 @@ namespace RealMembership.Logins.SecurityEvents
         /// Gets or sets the time that the verification process was finished at.
         /// </summary>
         /// <returns></returns>
-        public TDateTime? FinishTime
+        public DateTimeOffset? FinishTime
         {
             get;
             set;

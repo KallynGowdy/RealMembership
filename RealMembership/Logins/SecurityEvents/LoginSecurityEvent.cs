@@ -7,11 +7,9 @@ using System.Threading.Tasks;
 namespace RealMembership.Logins.SecurityEvents
 {
     /// <summary>
-    /// Defines am abstract class that represents a <see cref="ILoginSecurityEvent{TAccount, TDateTime}"/>.
+    /// Defines am abstract class that represents a <see cref="ILoginSecurityEvent"/>.
     /// </summary>
-    public abstract class LoginSecurityEvent<TAccount, TDateTime> : ILoginSecurityEvent<TAccount, TDateTime>
-        where TAccount : IUserAccount<TAccount, TDateTime>
-        where TDateTime : struct
+    public abstract class LoginSecurityEvent : ILoginSecurityEvent
     {
         /// <summary>
         /// Gets the type of event that is being recorded.
@@ -42,10 +40,18 @@ namespace RealMembership.Logins.SecurityEvents
         /// <summary>
         /// Gets or sets the login that the event was against. Null if the event could not be matched to a login. (i.e. non-existant account)
         /// </summary>
-        public ILogin<TAccount, TDateTime> Login
+        public Login Login
         {
             get;
             set;
+        }
+
+        ILogin ILoginSecurityEvent.Login
+        {
+            get
+            {
+                return Login;
+            }
         }
 
         /// <summary>
@@ -77,7 +83,7 @@ namespace RealMembership.Logins.SecurityEvents
         /// <summary>
         /// Gets or sets the time that the event occured at.
         /// </summary>
-        public TDateTime TimeOfEvent
+        public DateTimeOffset TimeOfEvent
         {
             get;
             set;

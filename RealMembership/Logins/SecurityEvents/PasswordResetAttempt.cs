@@ -7,11 +7,9 @@ using System.Threading.Tasks;
 namespace RealMembership.Logins.SecurityEvents
 {
     /// <summary>
-    /// Defines a class that provides an implementation of <see cref="IPasswordResetAttempt{TAccount, TDateTime}"/>.
+    /// Defines a class that provides an implementation of <see cref="IPasswordResetAttempt"/>.
     /// </summary>
-    public class PasswordResetAttempt<TAccount, TDateTime> : LoginSecurityEvent<TAccount, TDateTime>, IPasswordResetAttempt<TAccount, TDateTime>
-        where TAccount : IUserAccount<TAccount, TDateTime>
-        where TDateTime : struct
+    public class PasswordResetAttempt : LoginSecurityEvent, IPasswordResetAttempt
     {
         /// <summary>
         /// Gets the type of event that is being recorded.
@@ -58,7 +56,7 @@ namespace RealMembership.Logins.SecurityEvents
         /// Null if this phase has not been reached yet.
         /// </summary>
         /// <returns></returns>
-        public PasswordResetFinishResult<TAccount, TDateTime> FinishResetResult
+        public PasswordResetFinishResult FinishResetResult
         {
             get;
             set;
@@ -79,7 +77,7 @@ namespace RealMembership.Logins.SecurityEvents
         /// Gets or sets the time that the password reset process was finished at.
         /// </summary>
         /// <returns></returns>
-        public TDateTime? FinishTime
+        public DateTimeOffset? FinishTime
         {
             get;
             set;

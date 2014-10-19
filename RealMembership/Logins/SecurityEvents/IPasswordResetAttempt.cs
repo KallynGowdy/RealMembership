@@ -9,15 +9,13 @@ namespace RealMembership.Logins.SecurityEvents
     /// <summary>
     /// Defines an interface that represents an audit of an attempt to reset the password of a login.
     /// </summary>
-    public interface IPasswordResetAttempt<TAccount, TDateTime> : ILoginSecurityEvent<TAccount, TDateTime>
-        where TAccount : IUserAccount<TAccount, TDateTime>
-        where TDateTime : struct
+    public interface IPasswordResetAttempt : ILoginSecurityEvent
     {
         /// <summary>
         /// Gets or sets the time that the password reset process was finished at.
         /// </summary>
         /// <returns></returns>
-        TDateTime? FinishTime
+        DateTimeOffset? FinishTime
         {
             get;
             set;
@@ -40,7 +38,7 @@ namespace RealMembership.Logins.SecurityEvents
         /// Null if this phase has not been reached yet.
         /// </summary>
         /// <returns></returns>
-        PasswordResetFinishResult<TAccount, TDateTime> FinishResetResult
+        PasswordResetFinishResult FinishResetResult
         {
             get;
             set;

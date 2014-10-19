@@ -6,7 +6,7 @@
     <ProjectGuid>{1BFC77D1-4A5B-4D66-AC58-CD4F7F62F9B8}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>RealMembership.EF.Tests</RootNamespace>
+    <RootNamespace>RealMembership.Implementation.EF.Tests</RootNamespace>
     <AssemblyName>RealMembership.EF.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -49,6 +49,8 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Data.Entity" />
     <Reference Include="System.Transactions" />
   </ItemGroup>
   <Choose>
@@ -64,6 +66,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="TestContext.cs" />
     <Compile Include="UserServiceTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

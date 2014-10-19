@@ -12,7 +12,7 @@ namespace RealMembership.Implementation.EF
     /// Defines a class that provides an implementation of <see cref="ILoginRepository{TAccount, DateTimeOffset}"/>.
     /// </summary>
     public class LoginRepository<TAccount> : QueryableLoginRepository<TAccount>
-        where TAccount : UserAccount<TAccount>
+        where TAccount : UserAccount
     {
         public LoginRepository(UserAccountDbContext<TAccount> context)
         {
@@ -34,7 +34,7 @@ namespace RealMembership.Implementation.EF
             }
         }
 
-        protected override IQueryable<Login<TAccount, DateTimeOffset>> Logins
+        protected override IQueryable<Login> Logins
         {
             get
             {
@@ -42,7 +42,7 @@ namespace RealMembership.Implementation.EF
             }
         }
 
-        protected override IQueryable<LoginSecurityEvent<TAccount, DateTimeOffset>> LoginSecurityEvents
+        protected override IQueryable<LoginSecurityEvent> LoginSecurityEvents
         {
             get
             {

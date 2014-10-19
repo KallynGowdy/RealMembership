@@ -7,9 +7,8 @@ namespace RealMembership
     /// </summary>
     /// <typeparam name="TAccount">The type of the account being used.</typeparam>
     /// <typeparam name="TDateTime">The type of the dates being used.</typeparam>
-    public class EmailAccountCreationResult<TAccount, TDateTime> : AccountCreationResult<TAccount, TDateTime>
-        where TAccount : IUserAccount<TAccount, TDateTime>
-        where TDateTime : struct
+    public class EmailAccountCreationResult<TAccount> : AccountCreationResult<TAccount>
+        where TAccount : UserAccount
     {
         /// <summary>
         /// Gets or sets the result of the attempt to set the login's password.

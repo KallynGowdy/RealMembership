@@ -7,30 +7,17 @@ using System.Threading.Tasks;
 namespace RealMembership.Logins
 {
     /// <summary>
-    /// Defines an abstract class that provides an implementation of <see cref="IUsernameLogin{TAccount, TDateTime}"/>.
+    /// Defines an abstract class that provides an implementation of <see cref="IUsernameLogin"/>.
     /// </summary>
-    public abstract class UsernameLogin<TAccount, TDateTime> : PasswordLogin<TAccount, TDateTime>, IUsernameLogin<TAccount, TDateTime>
-        where TAccount : IUserAccount<TAccount, TDateTime>
-        where TDateTime : struct
+    public class UsernameLogin : PasswordLogin, IUsernameLogin
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="UsernameLogin{TAccount, TDateTime}"/> class.
-        /// </summary>
-        /// <param name="email">The email.</param>
-        /// <param name="username">The username.</param>
-        /// <exception cref="System.ArgumentException">Must not be null or white space;username</exception>
-        protected UsernameLogin(string email, string username) : base(email)
-        {
-        }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="UsernameLogin{TAccount, TDateTime}"/> class.
+        /// Initializes a new instance of the <see cref="UsernameLogin"/> class.
         /// </summary>
-        /// <param name="email">The email.</param>
         /// <param name="username">The username.</param>
-        /// <param name="password">The password.</param>
         /// <exception cref="System.ArgumentException">Must not be null or white space;username</exception>
-        protected UsernameLogin(string email, string username, string password) : base(email, password)
+        protected UsernameLogin(string username)
         {
             if (string.IsNullOrWhiteSpace(username)) throw new ArgumentException("Must not be null or white space", "username");
             this.Username = username;

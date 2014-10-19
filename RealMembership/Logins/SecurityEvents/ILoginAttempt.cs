@@ -17,11 +17,8 @@ namespace RealMembership.Logins.SecurityEvents
     /// <summary>
     /// Defines an interface for objects that record information about attempted logins.
     /// </summary>
-    /// <typeparam name="TAccount">The type of the accounts used.</typeparam>
     /// <typeparam name="TDateTime">The type of the structue used to contain date information.</typeparam>
-    public interface ILoginAttempt<TAccount, TDateTime> : ILoginSecurityEvent<TAccount, TDateTime>
-        where TAccount : IUserAccount<TAccount, TDateTime>
-        where TDateTime : struct
+    public interface ILoginAttempt : ILoginSecurityEvent
     {
         /// <summary>
         /// Gets or sets the ID of the login attempt.

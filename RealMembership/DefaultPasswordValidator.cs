@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RealMembership.Implementation.Default
+namespace RealMembership
 {
     /// <summary>
     /// Defines a class that provides a default password validator.
@@ -155,7 +155,7 @@ namespace RealMembership.Implementation.Default
                     Result = SetPasswordResultType.NotEnoughDigits
                 };
             }
-            else if (password.Count(c => !(char.IsDigit(c) || char.IsUpper(c) || char.IsLower(c))) >= MinimumRequiredSymbols)
+            else if (password.Count(c => !(char.IsDigit(c) || char.IsUpper(c) || char.IsLower(c))) < MinimumRequiredSymbols)
             {
                 return new SetPasswordResult
                 {

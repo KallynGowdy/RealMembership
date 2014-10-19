@@ -9,11 +9,7 @@ namespace RealMembership.Logins.SecurityEvents
     /// <summary>
     /// Defines an interface for objects that represent a security event that occured for an account.
     /// </summary>
-    /// <typeparam name="TAccount">The type of the account.</typeparam>
-    /// <typeparam name="TDateTime">The type of the date.</typeparam>
-    public interface ILoginSecurityEvent<TAccount, TDateTime>
-        where TAccount : IUserAccount<TAccount, TDateTime>
-        where TDateTime : struct
+    public interface ILoginSecurityEvent
     {
         /// <summary>
         /// Gets or sets the ID of this login event.
@@ -29,7 +25,7 @@ namespace RealMembership.Logins.SecurityEvents
         /// Gets or sets the time that the event occured at.
         /// </summary>
         /// <returns></returns>
-        TDateTime TimeOfEvent
+        DateTimeOffset TimeOfEvent
         {
             get;
             set;
@@ -40,10 +36,9 @@ namespace RealMembership.Logins.SecurityEvents
         /// Null if the event could not be matched to a login. (i.e. non-existant account)
         /// </summary>
         /// <returns></returns>
-        ILogin<TAccount, TDateTime> Login
+        ILogin Login
         {
             get;
-            set;
         }
 
         /// <summary>

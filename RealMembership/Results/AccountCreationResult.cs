@@ -17,9 +17,8 @@ namespace RealMembership
     /// <summary>
     /// Defines an abstract class that represents the result of the account creation process.
     /// </summary>
-    public class AccountCreationResult<TAccount, TDateTime> : ResultBase
-        where TAccount : IUserAccount<TAccount, TDateTime>
-        where TDateTime : struct
+    public class AccountCreationResult<TAccount> : ResultBase
+        where TAccount : UserAccount
     {
         /// <summary>
         /// Gets or sets the type that defines why the result was successful or not.

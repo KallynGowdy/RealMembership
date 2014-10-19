@@ -123,11 +123,9 @@ namespace RealMembership.Logins
     }
 
     /// <summary>
-    /// Defines an abstract class that represents a <see cref="IPasswordLogin{TAccount, TDate}"/>.
+    /// Defines an abstract class that represents a <see cref="IPasswordLogin"/>.
     /// </summary>
-    public abstract class PasswordLogin<TAccount, TDateTime> : EmailLogin<TAccount, TDateTime>, IPasswordLogin<TAccount, TDateTime>
-        where TAccount : IUserAccount<TAccount, TDateTime>
-        where TDateTime : struct
+    public class PasswordLogin : EmailLogin, IPasswordLogin
     {
         /// <summary>
         /// Gets the HMAC message that should be used when computing the HMAC for the reset codes.
@@ -168,80 +166,53 @@ namespace RealMembership.Logins
             return Convert.ToBase64String(CryptoHelpers.GetSecureRandomBytes(CryptoHelpers.DefaultHashSize));
         }
 
+        public static PasswordValidator DefaultPasswordValidator
+        {
+            get
+            {
+                return new DefaultPasswordValidator();
+            }
+        }
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="PasswordLogin{TAccount, TDateTime}"/> class.
+        /// Gets or sets the span of time that the password reset is valid for.
+        /// </summary>
+        /// <returns></returns>
+        public TimeSpan ResetLifetime
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PasswordLogin"/> class.
         /// </summary>
         /// <param name="passwordValidator">The password validator.</param>
         /// <exception cref="ArgumentNullException">passwordValidator</exception>
-        protected PasswordLogin(PasswordValidator passwordValidator) : this()
+        protected PasswordLogin(PasswordValidator passwordValidator) : this(passwordValidator, CryptoHelpers.DefaultIterations, CryptoHelpers.GetSecureRandomBytes(CryptoHelpers.DefaultHashSize))
         {
             if (passwordValidator == null) throw new ArgumentNullException("passwordValidator");
             this.passwordValidator = passwordValidator;
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="PasswordLogin{TAccount, TDateTime}"/> class.
+        /// Initializes a new instance of the <see cref="PasswordLogin"/> class.
         /// </summary>
-        /// <param name="email">The email that should be stored.</param>
-        /// <param name="password">The password that should be stored. NOTE THAT the password will not be validated.</param>
-        protected PasswordLogin(string email, string password) : this(email)
-        {
-            PasswordHash = CalculatePasswordHash(password).Result;
-        }
+        protected PasswordLogin() : this(DefaultPasswordValidator) { }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="PasswordLogin{TAccount, TDateTime}"/> class.
-        /// </summary>
-        /// <param name="email">The email used by the login.</param>
-        protected PasswordLogin(string email) : this(email, CryptoHelpers.DefaultIterations, CryptoHelpers.GetSecureRandomBytes(CryptoHelpers.DefaultHashSize))
-        {
-
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="PasswordLogin{TAccount, TDateTime}"/> class.
-        /// </summary>
-        protected PasswordLogin() : this(CryptoHelpers.DefaultIterations, CryptoHelpers.GetSecureRandomBytes(CryptoHelpers.DefaultHashSize)) { }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="PasswordLogin{TAccount, TDateTime}" /> class.
+        /// Initializes a new instance of the <see cref="PasswordLogin" /> class.
         /// </summary>
         /// <param name="hashIterations">The hash iterations.</param>
         /// <param name="salt">The salt.</param>
-        protected PasswordLogin(int hashIterations, byte[] salt)
+        protected PasswordLogin(PasswordValidator passwordValidator, int hashIterations, byte[] salt)
         {
             if (hashIterations < 1) throw new ArgumentOutOfRangeException("hashIterations");
             if (salt == null) throw new ArgumentNullException("salt");
+            if (passwordValidator == null) throw new ArgumentNullException("passwordValidator");
             this.Iterations = hashIterations;
             this.Salt = Convert.ToBase64String(salt);
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="PasswordLogin{TAccount, TDateTime}"/> class.
-        /// </summary>
-        /// <param name="email">The email used by the login.</param>
-        /// <param name="hashIterations">The hash iterations.</param>
-        /// <param name="salt">The salt.</param>
-        /// <exception cref="ArgumentOutOfRangeException">hashIterations</exception>
-        /// <exception cref="ArgumentNullException">salt</exception>
-        protected PasswordLogin(string email, int hashIterations, byte[] salt) : base(email)
-        {
-            if (hashIterations < 1) throw new ArgumentOutOfRangeException("hashIterations");
-            if (salt == null) throw new ArgumentNullException("salt");
-            this.Iterations = hashIterations;
-            this.Salt = Convert.ToBase64String(salt);
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="PasswordLogin{TAccount, TDateTime}"/> class.
-        /// </summary>
-        /// <param name="email">The email.</param>
-        /// <param name="hashIterations">The hash iterations.</param>
-        /// <param name="salt">The salt.</param>
-        /// <param name="password">The password.</param>
-        protected PasswordLogin(string email, int hashIterations, byte[] salt, string password) : this(email, hashIterations, salt)
-        {
-            PasswordHash = CalculatePasswordHash(password).Result;
+            this.passwordValidator = passwordValidator;
         }
 
         private PasswordValidator passwordValidator;
@@ -297,33 +268,42 @@ namespace RealMembership.Logins
         }
 
         /// <summary>
-        /// Gets or sets whether the login is currently in the password reset process.
-        /// </summary>
-        /// <returns></returns>
-        [NotMapped]
-        public abstract bool IsInResetProcess
-        {
-            get;
-        }
-
-        /// <summary>
         /// Gets or sets the time that the password reset was requested.
         /// </summary>
         /// <returns></returns>
-        public virtual TDateTime? ResetRequestTime
+        public virtual DateTimeOffset? ResetRequestTime
         {
             get;
             set;
         }
 
         /// <summary>
-        /// Gets or sets the time that the password reset expires.
+        /// Gets whether the password reset process is currently active for this login.
         /// </summary>
-        /// <returns></returns>
-        [NotMapped]
-        public abstract TDateTime? ResetExpireTime
+        public bool IsInResetProcess
         {
-            get;
+            get
+            {
+                return DateTimeOffset.Now < ResetExpireTime;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the time that the password reset code
+        /// </summary>
+        public DateTimeOffset? ResetExpireTime
+        {
+            get
+            {
+                if (ResetRequestTime != null)
+                {
+                    return ResetRequestTime.Value + ResetLifetime;
+                }
+                else
+                {
+                    return null;
+                }
+            }
         }
 
         /// <summary>
@@ -341,7 +321,7 @@ namespace RealMembership.Logins
         /// </summary>
         /// <param name="password">The password that should be hashed.</param>
         /// <returns></returns>
-        protected virtual Task<string> CalculatePasswordHash(string password)
+        protected virtual Task<string> CalculatePasswordHashAsync(string password)
         {
             byte[] salt = Convert.FromBase64String(Salt);
             using (Rfc2898DeriveBytes pbkdf2 = new Rfc2898DeriveBytes(password, salt, Iterations))
@@ -359,7 +339,7 @@ namespace RealMembership.Logins
         /// </returns>
         public async Task<bool> MatchesPasswordAsync(string password)
         {
-            return (await CalculatePasswordHash(password)).Equals(PasswordHash, StringComparison.Ordinal);
+            return (await CalculatePasswordHashAsync(password)).Equals(PasswordHash, StringComparison.Ordinal);
         }
 
         /// <summary>
@@ -407,7 +387,7 @@ namespace RealMembership.Logins
             }
             if (result.Successful)
             {
-                ResetRequestTime = GetCurrentInstant();
+                ResetRequestTime = DateTimeOffset.Now;
                 ResetCodeHash = GetCodeHash(result.Code);
             }
             else
@@ -425,7 +405,17 @@ namespace RealMembership.Logins
         /// <returns>
         /// Returns a new <see cref="SetPasswordResult" /> that represents whether the operation was successful.
         /// </returns>
-        public abstract Task<SetPasswordResult> SetPasswordAsync(string newPassword);
+        public virtual async Task<SetPasswordResult> SetPasswordAsync(string newPassword)
+        {
+            SetPasswordResult result = await SetPasswordCoreAsync(newPassword);
+
+            if (result.Successful)
+            {
+                PasswordHash = await CalculatePasswordHashAsync(newPassword);
+            }
+
+            return result;
+        }
 
         /// <summary>
         /// Sets the password stored in this object to the given value and returns a result determining whether the operation was sucessful.
@@ -456,7 +446,7 @@ namespace RealMembership.Logins
                     Message = "The login is not active."
                 };
             }
-            else if (!this.IsVerified)
+            else if (!this.IsVerified && RequiresVerification && PasswordHash != null)
             {
                 result = new SetPasswordResult
                 {
@@ -478,11 +468,5 @@ namespace RealMembership.Logins
             }
             return Task.FromResult(result);
         }
-
-        /// <summary>
-        /// Gets a value that represents the current instant of time.
-        /// </summary>
-        /// <returns>Returns a new <typeparamref name="TDateTime"/> object that represents the current instant of time.</returns>
-        protected abstract TDateTime GetCurrentInstant();
     }
 }

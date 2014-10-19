@@ -22,20 +22,16 @@ using System.Threading.Tasks;
 namespace RealMembership.Logins
 {
     /// <summary>
-    /// Defines an abstract class that provides a base for <see cref="ILogin{TAccount, TDateTime}"/>.
+    /// Defines an abstract class that provides a base for <see cref="ILogin"/>.
     /// </summary>
-    public abstract class Login<TAccount, TDateTime> : ILogin<TAccount, TDateTime>
-        where TAccount : IUserAccount<TAccount, TDateTime>
-        where TDateTime : struct
+    public abstract class Login : ILogin
     {
-        /// <summary>
-        /// Gets or sets the account that this login belongs to.
-        /// </summary>
-        /// <returns></returns>
-        public virtual TAccount Account
+        protected Login()
         {
-            get;
-            set;
+            IsCurrentlyActive = true;
+            IsVerified = false;
+            RequiresVerification = true;
+            CreationTime = DateTimeOffset.Now;
         }
 
         /// <summary>
@@ -60,13 +56,19 @@ namespace RealMembership.Logins
         /// Gets whether the account is currently locked because of incorrect login attempts.
         /// </summary>
         /// <returns></returns>
-        public abstract bool IsLockedOut { get; }
+        public bool IsLockedOut
+        {
+            get
+            {
+                return LockoutEndTime.HasValue && DateTimeOffset.Now < LockoutEndTime;
+            }
+        }
 
         /// <summary>
         /// Gets or sets the time that the lockout ends on.
         /// </summary>
         /// <returns></returns>
-        public virtual TDateTime? LockoutEndTime { get; set; }
+        public virtual DateTimeOffset? LockoutEndTime { get; set; }
 
         /// <summary>
         /// Gets or sets whether this login is verified or not.
@@ -97,12 +99,42 @@ namespace RealMembership.Logins
         }
 
         /// <summary>
+        /// Gets or sets the last time that verification was successfully requested at.
+        /// </summary>
+        /// <returns></returns>
+        public DateTimeOffset? VerificationRequestTime
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// Gets the collection of security events that have occured for this login. If null then security should not be recorded.
         /// </summary>
-        public virtual ICollection<LoginSecurityEvent<TAccount, TDateTime>> SecurityEvents
+        public virtual ICollection<LoginSecurityEvent> SecurityEvents
         {
             get;
             protected set;
+        }
+
+        /// <summary>
+        /// Gets or sets the account that this login belongs to.
+        /// </summary>
+        /// <returns></returns>
+        public virtual UserAccount Account
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets the time that this <see cref="Login"/> was created at.
+        /// </summary>
+        /// <returns></returns>
+        public DateTimeOffset CreationTime
+        {
+            get;
+            set;
         }
 
         /// <summary>
@@ -116,15 +148,18 @@ namespace RealMembership.Logins
             {
                 type = VerificationRequestResultType.LoginNotActive;
                 VerificationCode = null;
+                VerificationRequestTime = null;
             }
             else if (IsVerified)
             {
                 type = VerificationRequestResultType.AlreadyVerified;
                 VerificationCode = null;
+                VerificationRequestTime = null;
             }
             else
             {
                 VerificationCode = Convert.ToBase64String(CryptoHelpers.GetSecureRandomBytes(CryptoHelpers.DefaultHashSize));
+                VerificationRequestTime = DateTimeOffset.Now;
                 type = VerificationRequestResultType.NewCodeCreated;
             }
             return Task.FromResult(new VerificationRequestResult

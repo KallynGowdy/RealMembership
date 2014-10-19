@@ -23,9 +23,7 @@ namespace RealMembership.Logins
     /// <summary>
     /// Defines an interface for objects that represent a login for usernames.
     /// </summary>
-    public interface IUsernameLogin<TAccount, TDateTime> : IEmailPasswordLogin<TAccount, TDateTime>
-        where TAccount : IUserAccount<TAccount, TDateTime>
-        where TDateTime : struct
+    public interface IUsernameLogin : IEmailPasswordLogin
     {
         /// <summary>
         /// Gets or sets the username that should be used for this login.
