@@ -1,6 +1,6 @@
 using System;
 
-namespace RealMembership.Logins
+namespace RealMembership
 {
     /// <summary>
     /// Defines a class that represents the result of a 'Set Password' operation.

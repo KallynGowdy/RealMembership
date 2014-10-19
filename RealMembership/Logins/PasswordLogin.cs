@@ -171,8 +171,19 @@ namespace RealMembership.Logins
         /// <summary>
         /// Initializes a new instance of the <see cref="PasswordLogin{TAccount, TDateTime}"/> class.
         /// </summary>
+        /// <param name="passwordValidator">The password validator.</param>
+        /// <exception cref="ArgumentNullException">passwordValidator</exception>
+        protected PasswordLogin(PasswordValidator passwordValidator) : this()
+        {
+            if (passwordValidator == null) throw new ArgumentNullException("passwordValidator");
+            this.passwordValidator = passwordValidator;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PasswordLogin{TAccount, TDateTime}"/> class.
+        /// </summary>
         /// <param name="email">The email that should be stored.</param>
-        /// <param name="password">The password that should be stored.</param>
+        /// <param name="password">The password that should be stored. NOTE THAT the password will not be validated.</param>
         protected PasswordLogin(string email, string password) : this(email)
         {
             PasswordHash = CalculatePasswordHash(password).Result;
@@ -185,6 +196,24 @@ namespace RealMembership.Logins
         protected PasswordLogin(string email) : this(email, CryptoHelpers.DefaultIterations, CryptoHelpers.GetSecureRandomBytes(CryptoHelpers.DefaultHashSize))
         {
 
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PasswordLogin{TAccount, TDateTime}"/> class.
+        /// </summary>
+        protected PasswordLogin() : this(CryptoHelpers.DefaultIterations, CryptoHelpers.GetSecureRandomBytes(CryptoHelpers.DefaultHashSize)) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PasswordLogin{TAccount, TDateTime}" /> class.
+        /// </summary>
+        /// <param name="hashIterations">The hash iterations.</param>
+        /// <param name="salt">The salt.</param>
+        protected PasswordLogin(int hashIterations, byte[] salt)
+        {
+            if (hashIterations < 1) throw new ArgumentOutOfRangeException("hashIterations");
+            if (salt == null) throw new ArgumentNullException("salt");
+            this.Iterations = hashIterations;
+            this.Salt = Convert.ToBase64String(salt);
         }
 
         /// <summary>
@@ -213,6 +242,26 @@ namespace RealMembership.Logins
         protected PasswordLogin(string email, int hashIterations, byte[] salt, string password) : this(email, hashIterations, salt)
         {
             PasswordHash = CalculatePasswordHash(password).Result;
+        }
+
+        private PasswordValidator passwordValidator;
+
+        /// <summary>
+        /// Gets or sets the <see cref="PasswordValidator"/> used to validate passwords.
+        /// </summary>
+        /// <returns></returns>
+        [NotMapped]
+        public virtual PasswordValidator PasswordValidator
+        {
+            get
+            {
+                return passwordValidator;
+            }
+            set
+            {
+                if (value == null) throw new ArgumentNullException("value");
+                passwordValidator = value;
+            }
         }
 
         /// <summary>
@@ -425,7 +474,7 @@ namespace RealMembership.Logins
             }
             else
             {
-                result = null;
+                result = PasswordValidator.ValidatePassword(newPassword);
             }
             return Task.FromResult(result);
         }

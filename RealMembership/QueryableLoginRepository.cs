@@ -123,7 +123,7 @@ namespace RealMembership
                 Logins
                 .OfType<EmailLogin<TAccount, TDateTime>>()
                 .Where(WhereEmailEqualsExpression(email))
-                .SingleOrDefault(WhereTenantEqualsForLoginExpression<EmailLogin<TAccount,TDateTime>>(tenant)));
+                .SingleOrDefault(WhereTenantEqualsForLoginExpression<EmailLogin<TAccount, TDateTime>>(tenant)));
         }
 
         /// <summary>
@@ -195,7 +195,9 @@ namespace RealMembership
 
         public abstract Task<PasswordResetAttempt<TAccount, TDateTime>> RecordAttemptForPasswordResetAsync(string tenant, string identification, IdentificationType? identificationType, PasswordResetRequestResult result, PasswordLogin<TAccount, TDateTime> login);
 
-        public abstract Task CreateAccountAsync(TAccount account); 
+        public abstract Task<TAccount> AddAccountAsync(TAccount account);
+        public abstract Task<TAccount> CreateAccountAsync();
+        public abstract Task<TLogin> CreateLoginAsync<TLogin>() where TLogin : Login<TAccount, TDateTime>;
         #endregion
     }
 }

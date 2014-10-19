@@ -7,7 +7,7 @@
     <ProjectGuid>{F1B85952-787F-433C-91A0-1788CDCBDD1A}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>RealMembership.EF</RootNamespace>
+    <RootNamespace>RealMembership.Implementation.EF</RootNamespace>
     <AssemblyName>RealMembership.EF</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -36,9 +36,6 @@
     <Reference Include="EntityFramework.SqlServer">
       <HintPath>..\packages\EntityFramework.6.1.1\lib\net45\EntityFramework.SqlServer.dll</HintPath>
     </Reference>
-    <Reference Include="RealMembership">
-      <HintPath>..\packages\RealMembership.0.2.0-alpha\lib\RealMembership.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
@@ -50,16 +47,29 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DefaultPasswordValidator.cs" />
+    <Compile Include="LoginRepository.cs" />
+    <Compile Include="Logins\EmailLogin.cs" />
+    <Compile Include="Logins\LoginAttempt.cs" />
+    <Compile Include="Logins\PasswordLogin.cs" />
+    <Compile Include="Logins\PasswordResetAttempt.cs" />
+    <Compile Include="Logins\UsernameLogin.cs" />
+    <Compile Include="Logins\VerificationRequestAttempt.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="QueryableLoginRepository.cs" />
     <Compile Include="UserAccount.cs" />
     <Compile Include="UserAccountDbContext.cs" />
+    <Compile Include="UserService.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Logins\" />
+    <ProjectReference Include="..\RealMembership\RealMembership.csproj">
+      <Project>{78b76313-bcc4-43b5-9259-0f19d73d50fa}</Project>
+      <Name>RealMembership</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

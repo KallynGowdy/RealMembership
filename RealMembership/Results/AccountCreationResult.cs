@@ -15,15 +15,27 @@
 namespace RealMembership
 {
     /// <summary>
-    /// Defines a class that represents the result of the account creation process.
+    /// Defines an abstract class that represents the result of the account creation process.
     /// </summary>
-    public sealed class AccountCreationResult : ResultBase
+    public class AccountCreationResult<TAccount, TDateTime> : ResultBase
+        where TAccount : IUserAccount<TAccount, TDateTime>
+        where TDateTime : struct
     {
         /// <summary>
         /// Gets or sets the type that defines why the result was successful or not.
         /// </summary>
         /// <returns></returns>
         public AccountCreationResultType Result
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets the account that was created as a part of the result.
+        /// </summary>
+        /// <returns></returns>
+        public TAccount CreatedAccount
         {
             get;
             set;
@@ -58,6 +70,11 @@ namespace RealMembership
         /// <summary>
         /// Defines that the given email was invalid.
         /// </summary>
-        InvalidEmail
+        InvalidEmail,
+
+        /// <summary>
+        /// Defines that the given account creation request was invalid in some way or was unsupported.
+        /// </summary>
+        InvalidRequest
     }
 }

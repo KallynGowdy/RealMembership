@@ -7,7 +7,7 @@ using RealMembership.Logins;
 using RealMembership.Logins.SecurityEvents;
 using System.Linq.Expressions;
 
-namespace RealMembership.Implementation.Default
+namespace RealMembership.Implementation.EF
 {
     /// <summary>
     /// Defines an abstract class that provides a basic implementation of <see cref="ILoginRepository{TAccount, TDateTime}"/>.
@@ -119,6 +119,19 @@ namespace RealMembership.Implementation.Default
             }
 
             return await RecordSecurityEventAsync(attempt);
+        }
+
+        public override Task<PasswordResetAttempt<TAccount, DateTimeOffset>> RecordAttemptForPasswordResetAsync(string tenant, string identification, IdentificationType? identificationType, PasswordResetRequestResult result, PasswordLogin<TAccount, DateTimeOffset> login)
+        {
+            return RecordSecurityEventAsync(new PasswordResetAttempt<TAccount, DateTimeOffset>
+            {
+                Tenant = tenant,
+                LoginIdentification = identification,
+                IdentificationType = identificationType,
+                RequestCodeResult = result,
+                Login = login,
+                TimeOfEvent = DateTime.Now
+            });
         }
 
         /// <summary>

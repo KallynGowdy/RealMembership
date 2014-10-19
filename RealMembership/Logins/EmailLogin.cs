@@ -33,11 +33,16 @@ namespace RealMembership.Logins
         /// </summary>
         /// <param name="email">The email.</param>
         /// <exception cref="ArgumentException">Must not be null or just whitespace;email</exception>
-        public EmailLogin(string email)
+        protected EmailLogin(string email)
         {
             if (string.IsNullOrWhiteSpace(email)) throw new ArgumentException("Must not be null or just whitespace", "email");
             this.EmailAddress = email;
         }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EmailLogin{TAccount, TDateTime}"/> class.
+        /// </summary>
+        protected EmailLogin() { }
 
         /// <summary>
         /// Gets or sets the email address of the user account.
@@ -48,6 +53,38 @@ namespace RealMembership.Logins
         {
             get;
             set;
+        }
+
+        public Task<SetEmailResult> SetEmailAddressAsync(string newEmail)
+        {
+            SetEmailResult result;
+            if (string.IsNullOrWhiteSpace(newEmail) || !new EmailAddressAttribute().IsValid(newEmail))
+            {
+                result = new SetEmailResult
+                {
+                    Successful = false,
+                    Result = SetEmailResultType.NotValidEmail
+                };
+            }
+            else if (!this.IsCurrentlyActive)
+            {
+                result = new SetEmailResult
+                {
+                    Successful = false,
+                    Result = SetEmailResultType.LoginNotActive
+                };
+            }
+            else
+            {
+                this.EmailAddress = newEmail;
+                result = new SetEmailResult
+                {
+                    Successful = true,
+                    Result = SetEmailResultType.ValidEmail
+                };
+            }
+
+            return Task.FromResult(result);
         }
     }
 }

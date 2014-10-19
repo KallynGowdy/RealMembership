@@ -55,9 +55,16 @@ namespace RealMembership
         /// <summary>
         /// Creates a new account using the given account model and returns the result.
         /// </summary>
-        /// <param name="account">The account that should be created.</param>
-        /// <returns>Returns a new <see cref="AccountCreationResult"/> object that represents the result of the operation.</returns>
-        Task<AccountCreationResult> CreateAccountAsync(TAccount account);
+        /// <param name="request">The request that contains the information on how the account should be created.</param>
+        /// <returns>Returns a new <see cref="AccountCreationResult{TAccount, TDateTime}"/> object that represents the result of the operation.</returns>
+        Task<AccountCreationResult<TAccount, TDateTime>> CreateAccountAsync(AccountCreationRequest request);
+
+        /// <summary>
+        /// Creates a new account using the given account model and returns the result
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        Task<EmailAccountCreationResult<TAccount, TDateTime>> CreateAccountAsync(EmailAccountCreationRequest request);
 
         /// <summary>
         /// Requests a password reset for the login contained by the given tenant with the given email.

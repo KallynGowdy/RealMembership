@@ -219,13 +219,6 @@ namespace RealMembership
         }
 
         /// <summary>
-        /// Creates a new account using the given account model and returns the result.
-        /// </summary>
-        /// <param name="account">The account that should be created.</param>
-        /// <returns>Returns a new <see cref="AccountCreationResult"/> object that represents the result of the operation.</returns>
-        public abstract Task<AccountCreationResult> CreateAccountAsync(TAccount account);
-
-        /// <summary>
         /// Gets the user that belongs to the given tenant with the given email address.
         /// </summary>
         /// <param name="tenant">The name of the tenant that the account should be retrieved from.</param>
@@ -288,6 +281,10 @@ namespace RealMembership
                     SetPasswordResult = passwordSetResult
                 };
             }
+            if (result.Successful)
+            {
+                await SendPasswordChangedEmailAsync(login);
+            }
             await Repository.RecordAttemptForPasswordResetAsync(login != null ? login.Account.Tenant : null, code, IdentificationType.ResetCode, result, login);
             return result;
         }
@@ -325,7 +322,7 @@ namespace RealMembership
         /// </summary>
         /// <param name="login">The login that the password reset is for.</param>
         /// <returns></returns>
-        protected async Task<PasswordResetRequestResult> RequestPasswordResetAsync(IPasswordLogin<TAccount, TDateTime> login)
+        protected async Task<PasswordResetRequestResult> RequestPasswordResetAsync(PasswordLogin<TAccount, TDateTime> login)
         {
             PasswordResetRequestResult result;
             if (login == null)
@@ -342,12 +339,7 @@ namespace RealMembership
                 result = await login.RequestResetCodeAsync();
                 if (result.Successful)
                 {
-                    await SendEmailAsync(new EmailMessage
-                    {
-                        Recipent = login.EmailAddress,
-                        Html = await MessageFormatter.FormatPasswordResetMessageAsync(result.Code, login),
-                        Subject = await MessageFormatter.FormatPasswordResetSubjectAsync(login)
-                    });
+                    await SendRequestPasswordResetEmailAsync(result.Code, login);
                 }
             }
             return result;
@@ -374,6 +366,14 @@ namespace RealMembership
             {
                 result = await login.VerifyAsync(code);
             }
+            if (result.Successful)
+            {
+                EmailLogin<TAccount, TDateTime> email = login as EmailLogin<TAccount, TDateTime>;
+                if (email != null)
+                {
+                    await SendVerifiedEmailAsync(email);
+                }
+            }
             await Repository.RecordAttemptForLoginVerificationAsync(null, code, IdentificationType.VerificationCode, result, login);
             return result;
         }
@@ -387,6 +387,11 @@ namespace RealMembership
         public async Task<VerificationRequestResult> RequestNewEmailVerificationCodeAsync(string tenant, string email)
         {
             EmailLogin<TAccount, TDateTime> login = await GetLoginByEmailAsync(tenant, email);
+            return await RequestNewEmailVerificationCodeAsync(login);
+        }
+
+        protected async Task<VerificationRequestResult> RequestNewEmailVerificationCodeAsync(EmailLogin<TAccount,TDateTime> login)
+        {
             VerificationRequestResult result;
             if (login == null)
             {
@@ -402,12 +407,7 @@ namespace RealMembership
                 result = await login.RequestVerificationCodeAsync();
                 if (result.Successful)
                 {
-                    await SendEmailAsync(new EmailMessage
-                    {
-                        Recipent = login.EmailAddress,
-                        Html = await MessageFormatter.FormatVerifyLoginMessageAsync(result.Code, login),
-                        Subject = await MessageFormatter.FormatVerifyLoginSubjectAsync(login)
-                    });
+                    await SendVerificationEmailAsync(result.Code, login);
                 }
             }
             return result;
@@ -450,6 +450,46 @@ namespace RealMembership
             return result;
         }
 
+        protected async virtual Task SendRequestPasswordResetEmailAsync(string code, PasswordLogin<TAccount, TDateTime> login)
+        {
+            await SendEmailAsync(new EmailMessage
+            {
+                Recipent = login.EmailAddress,
+                Html = await MessageFormatter.FormatPasswordResetMessageAsync(code, login),
+                Subject = await MessageFormatter.FormatPasswordResetSubjectAsync(login)
+            });
+        }
+
+        protected async virtual Task SendPasswordChangedEmailAsync(PasswordLogin<TAccount, TDateTime> login)
+        {
+            await SendEmailAsync(new EmailMessage
+            {
+                Recipent = login.EmailAddress,
+                Html = await MessageFormatter.FormatPasswordChangedMessageAsync(login),
+                Subject = await MessageFormatter.FormatVerifyLoginSubjectAsync(login)
+            });
+        }
+
+        protected async virtual Task SendVerificationEmailAsync(string code, EmailLogin<TAccount, TDateTime> login)
+        {
+            await SendEmailAsync(new EmailMessage
+            {
+                Recipent = login.EmailAddress,
+                Html = await MessageFormatter.FormatVerifyLoginMessageAsync(code, login),
+                Subject = await MessageFormatter.FormatVerifyLoginSubjectAsync(login)
+            });
+        }
+
+        protected async virtual Task SendVerifiedEmailAsync(EmailLogin<TAccount, TDateTime> login)
+        {
+            await SendEmailAsync(new EmailMessage
+            {
+                Recipent = login.EmailAddress,
+                Html = await MessageFormatter.FormatVerifiedMessageAsync(login),
+                Subject = await MessageFormatter.FormatVerifiedSubjectAsync(login)
+            });
+        }
+
         /// <summary>
         /// Sends the given <see cref="SmsMessage"/> using the configured <see cref="SmsService"/>.
         /// Throws a new <see cref="InvalidOperationException"/> if no <see cref="SmsService"/> was configured.
@@ -483,5 +523,34 @@ namespace RealMembership
                 return EmailService.SendEmailAsync(message);
             }
         }
+
+        /// <summary>
+        /// Creates a new account using the given account model and returns the result.
+        /// </summary>
+        /// <param name="request">The request that contains the information on how the account should be created.</param>
+        /// <returns>Returns a new <see cref="AccountCreationResult{TAccount, TDateTime}"/> object that represents the result of the operation.</returns>
+        public async virtual Task<AccountCreationResult<TAccount, TDateTime>> CreateAccountAsync(AccountCreationRequest request)
+        {
+            if (request is EmailAccountCreationRequest)
+            {
+                return await CreateAccountAsync((EmailAccountCreationRequest)request);
+            }
+            else
+            {
+                return new AccountCreationResult<TAccount, TDateTime>
+                {
+                    Successful = false,
+                    Result = AccountCreationResultType.InvalidRequest,
+                    CreatedAccount = default(TAccount)
+                };
+            }
+        }
+
+        /// <summary>
+        /// Creates a new account using the given account model and returns the result
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        public abstract Task<EmailAccountCreationResult<TAccount, TDateTime>> CreateAccountAsync(EmailAccountCreationRequest request);
     }
 }

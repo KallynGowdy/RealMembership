@@ -37,16 +37,12 @@
     <Reference Include="System.IdentityModel" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AccountCreationRequest.cs" />
     <Compile Include="CollectionHelpers\DerivedCollectionWrapper.cs" />
+    <Compile Include="EmailAccountCreationRequest.cs" />
+    <Compile Include="EmailAccountCreationResult.cs" />
     <Compile Include="EmailMessage.cs" />
     <Compile Include="IMessageFormatter.cs" />
-    <Compile Include="Implementation\Default\Logins\EmailLogin.cs" />
-    <Compile Include="Implementation\Default\Logins\LoginAttempt.cs" />
-    <Compile Include="Implementation\Default\Logins\PasswordLogin.cs" />
-    <Compile Include="Implementation\Default\Logins\PasswordResetAttempt.cs" />
-    <Compile Include="Implementation\Default\Logins\UsernameLogin.cs" />
-    <Compile Include="Implementation\Default\Logins\VerificationRequestAttempt.cs" />
-    <Compile Include="Implementation\Default\QueryableLoginRepository.cs" />
     <Compile Include="Logins\SecurityEvents\ILoginSecurityEvent.cs" />
     <Compile Include="Logins\SecurityEvents\IPasswordResetAttempt.cs" />
     <Compile Include="Logins\SecurityEvents\IVerificationRequestAttempt.cs" />
@@ -56,6 +52,7 @@
     <Compile Include="Logins\SecurityEvents\VerificationRequestAttempt.cs" />
     <Compile Include="Logins\UsernameLogin.cs" />
     <Compile Include="Logins\PhoneLogin.cs" />
+    <Compile Include="PasswordValidator.cs" />
     <Compile Include="QueryableLoginRepository.cs" />
     <Compile Include="Results\AccountCreationResult.cs" />
     <Compile Include="Results\AuthenticationResult.cs" />
@@ -83,6 +80,7 @@
     <Compile Include="Logins\Login.cs" />
     <Compile Include="Logins\PasswordLogin.cs" />
     <Compile Include="Results\ResultBase.cs" />
+    <Compile Include="Results\SetEmailResult.cs" />
     <Compile Include="Results\SetPasswordResult.cs" />
     <Compile Include="Results\VerificationRequestResult.cs" />
     <Compile Include="Results\PasswordResetFinishResult.cs" />
@@ -93,6 +91,9 @@
     <Compile Include="UserAccount.cs" />
     <Compile Include="UserService.cs" />
     <Compile Include="Results\VerificationResult.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Implementation\Default\Logins\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

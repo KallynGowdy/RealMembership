@@ -5,30 +5,23 @@ using System.Text;
 using System.Threading.Tasks;
 using RealMembership.Logins;
 
-namespace RealMembership.Implementation.Default.Logins
+namespace RealMembership.Implementation.EF.Logins
 {
     /// <summary>
     /// Defines an abstract class that provides a basic implementation of <see cref="IPasswordLogin{TAccount, DateTimeOffset}"/>
     /// </summary>
-    public abstract class PasswordLogin<TAccount> : PasswordLogin<TAccount, DateTimeOffset>
+    public class PasswordLogin<TAccount> : PasswordLogin<TAccount, DateTimeOffset>
         where TAccount : IUserAccount<TAccount, DateTimeOffset>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="PasswordLogin{TAccount, TDateTime}"/> class.
         /// </summary>
-        /// <param name="email">The email that should be stored.</param>
-        /// <param name="password">The password that should be stored.</param>
-        protected PasswordLogin(string email, string password) : base(email, password)
+        /// <param name="email">The email used by the login.</param>
+        public PasswordLogin(string email) : base(email)
         {
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="PasswordLogin{TAccount, TDateTime}"/> class.
-        /// </summary>
-        /// <param name="email">The email used by the login.</param>
-        protected PasswordLogin(string email) : base(email)
-        {
-        }
+        public PasswordLogin() : base() { }
 
         /// <summary>
         /// Gets whether the account is currently locked because of incorrect login attempts.
@@ -78,6 +71,16 @@ namespace RealMembership.Implementation.Default.Logins
                     return null;
                 }
             }
+        }
+
+        public async override Task<SetPasswordResult> SetPasswordAsync(string newPassword)
+        {
+            return await SetPasswordCoreAsync(newPassword);
+        }
+
+        protected override DateTimeOffset GetCurrentInstant()
+        {
+            return DateTimeOffset.Now;
         }
     }
 }

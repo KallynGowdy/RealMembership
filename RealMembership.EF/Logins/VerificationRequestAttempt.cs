@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using RealMembership.Logins;
 using RealMembership.Logins.SecurityEvents;
 
-namespace RealMembership.Implementation.Default.Logins
+namespace RealMembership.Implementation.EF.Logins
 {
     /// <summary>
     /// Defines an abstract class that provides a basic implementation of <see cref="IVerificationRequestAttempt{TAccount, DateTimeOffset}"/>.

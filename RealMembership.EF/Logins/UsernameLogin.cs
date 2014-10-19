@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using RealMembership.Logins;
 
-namespace RealMembership.Implementation.Default.Logins
+namespace RealMembership.Implementation.EF.Logins
 {
     /// <summary>
     /// Defines an abstract class that provides a basic implementation of <see cref="IUsernameLogin{TAccount, DateTimeOffset}"/>
@@ -30,7 +30,7 @@ namespace RealMembership.Implementation.Default.Logins
         /// <param name="username">The username.</param>
         /// <param name="email">The email.</param>
         /// <param name="password">The password.</param>
-        protected UsernameLogin(string username, string email, string password) : base(email, password)
+        protected UsernameLogin(string username) : base()
         {
             if (string.IsNullOrWhiteSpace(username)) throw new ArgumentException("The username must not be null or whitespace", "username");
             this.Username = username;

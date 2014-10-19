@@ -28,13 +28,19 @@ namespace RealMembership.Logins
         where TDate : struct
     {
         /// <summary>
-        /// Gets or sets the email address of the user account.
+        /// Gets the email address of the user account.
         /// </summary>
         /// <returns></returns>
         string EmailAddress
         {
             get;
-            set;
         }
+
+        /// <summary>
+        /// Sets the email address to the given value and returns a result specifying whether the attempt was successful.
+        /// </summary>
+        /// <param name="newEmail">The new email address.</param>
+        /// <returns></returns>
+        Task<SetEmailResult> SetEmailAddressAsync(string newEmail);
     }
 }

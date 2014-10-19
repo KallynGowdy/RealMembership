@@ -69,11 +69,24 @@ namespace RealMembership
         Task<TAccount> GetAccountById(long id);
 
         /// <summary>
-        /// Persists the given account in the backing data store.
+        /// Persists the given account in the database.
         /// </summary>
         /// <param name="account"></param>
         /// <returns></returns>
-        Task CreateAccountAsync(TAccount account);
+        Task<TAccount> AddAccountAsync(TAccount account);
+
+        /// <summary>
+        /// Creates a new account and returns it.
+        /// </summary>
+        /// <returns></returns>
+        Task<TAccount> CreateAccountAsync();
+
+        /// <summary>
+        /// Creates a new login of the given type and returns it.
+        /// </summary>
+        /// <returns></returns>
+        Task<TLogin> CreateLoginAsync<TLogin>()
+            where TLogin : Login<TAccount, TDateTime>;
 
         /// <summary>
         /// Records a new login attempt that was against the given tenant using the given identification for a login with the given identification type that had the given result

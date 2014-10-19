@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RealMembership", "RealMembe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RealMembership.EF", "RealMembership.EF\RealMembership.EF.csproj", "{F1B85952-787F-433C-91A0-1788CDCBDD1A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RealMembership.EF.Tests", "RealMembership.EF.Tests\RealMembership.EF.Tests.csproj", "{1BFC77D1-4A5B-4D66-AC58-CD4F7F62F9B8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{F1B85952-787F-433C-91A0-1788CDCBDD1A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F1B85952-787F-433C-91A0-1788CDCBDD1A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F1B85952-787F-433C-91A0-1788CDCBDD1A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1BFC77D1-4A5B-4D66-AC58-CD4F7F62F9B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1BFC77D1-4A5B-4D66-AC58-CD4F7F62F9B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1BFC77D1-4A5B-4D66-AC58-CD4F7F62F9B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1BFC77D1-4A5B-4D66-AC58-CD4F7F62F9B8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

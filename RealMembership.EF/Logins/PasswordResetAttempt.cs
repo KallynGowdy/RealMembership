@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using RealMembership.Logins.SecurityEvents;
 
-namespace RealMembership.Implementation.Default.Logins
+namespace RealMembership.Implementation.EF.Logins
 {
     /// <summary>
     /// Defines an abstract class that provides an implementation of <see cref="IPasswordResetAttempt{TAccount, DateTimeOffset}"/>.
